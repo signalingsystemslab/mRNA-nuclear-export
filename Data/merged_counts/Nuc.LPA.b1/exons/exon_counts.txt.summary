@@ -1,0 +1,12 @@
+Status	/mnt/biggie/data2/diane/ribonomics/LPA_Naive_RNAseq/merged_bams_mm10_VM14/Nuc.LPA.b1/Nuc.LPA.000.b1_exons.bam	/mnt/biggie/data2/diane/ribonomics/LPA_Naive_RNAseq/merged_bams_mm10_VM14/Nuc.LPA.b1/Nuc.LPA.010.b1_exons.bam	/mnt/biggie/data2/diane/ribonomics/LPA_Naive_RNAseq/merged_bams_mm10_VM14/Nuc.LPA.b1/Nuc.LPA.020.b1_exons.bam	/mnt/biggie/data2/diane/ribonomics/LPA_Naive_RNAseq/merged_bams_mm10_VM14/Nuc.LPA.b1/Nuc.LPA.030.b1_exons.bam	/mnt/biggie/data2/diane/ribonomics/LPA_Naive_RNAseq/merged_bams_mm10_VM14/Nuc.LPA.b1/Nuc.LPA.040.b1_exons.bam	/mnt/biggie/data2/diane/ribonomics/LPA_Naive_RNAseq/merged_bams_mm10_VM14/Nuc.LPA.b1/Nuc.LPA.060.b1_exons.bam	/mnt/biggie/data2/diane/ribonomics/LPA_Naive_RNAseq/merged_bams_mm10_VM14/Nuc.LPA.b1/Nuc.LPA.090.b1_exons.bam	/mnt/biggie/data2/diane/ribonomics/LPA_Naive_RNAseq/merged_bams_mm10_VM14/Nuc.LPA.b1/Nuc.LPA.120.b1_exons.bam
+Assigned	21708620	22809634	20172438	22786132	19024447	21996635	27194903	25750651
+Unassigned_Ambiguity	260874	290243	257038	278955	234229	280728	356113	317799
+Unassigned_MultiMapping	6352733	7286071	6146522	7194798	6479505	7240872	9411645	7233781
+Unassigned_NoFeatures	35983627	28843620	22843664	30868068	32207723	29446015	36583472	28430250
+Unassigned_Unmapped	0	0	0	0	0	0	0	0
+Unassigned_MappingQuality	0	0	0	0	0	0	0	0
+Unassigned_FragmentLength	2532239	2665208	2266064	2673818	2171689	2476563	3042555	3004758
+Unassigned_Chimera	0	0	0	0	0	0	0	0
+Unassigned_Secondary	0	0	0	0	0	0	0	0
+Unassigned_Nonjunction	0	0	0	0	0	0	0	0
+Unassigned_Duplicate	0	0	0	0	0	0	0	0

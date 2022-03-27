@@ -1,0 +1,12 @@
+Status	/mnt/biggie/data2/diane/ribonomics/LPA_Naive_RNAseq/merged_bams_mm10_VM14/Nuc.LPA.b3/Nuc.LPA.000.b3_exons.bam	/mnt/biggie/data2/diane/ribonomics/LPA_Naive_RNAseq/merged_bams_mm10_VM14/Nuc.LPA.b3/Nuc.LPA.010.b3_exons.bam	/mnt/biggie/data2/diane/ribonomics/LPA_Naive_RNAseq/merged_bams_mm10_VM14/Nuc.LPA.b3/Nuc.LPA.015.b3_exons.bam	/mnt/biggie/data2/diane/ribonomics/LPA_Naive_RNAseq/merged_bams_mm10_VM14/Nuc.LPA.b3/Nuc.LPA.020.b3_exons.bam	/mnt/biggie/data2/diane/ribonomics/LPA_Naive_RNAseq/merged_bams_mm10_VM14/Nuc.LPA.b3/Nuc.LPA.025.b3_exons.bam	/mnt/biggie/data2/diane/ribonomics/LPA_Naive_RNAseq/merged_bams_mm10_VM14/Nuc.LPA.b3/Nuc.LPA.030.b3_exons.bam	/mnt/biggie/data2/diane/ribonomics/LPA_Naive_RNAseq/merged_bams_mm10_VM14/Nuc.LPA.b3/Nuc.LPA.040.b3_exons.bam	/mnt/biggie/data2/diane/ribonomics/LPA_Naive_RNAseq/merged_bams_mm10_VM14/Nuc.LPA.b3/Nuc.LPA.050.b3_exons.bam	/mnt/biggie/data2/diane/ribonomics/LPA_Naive_RNAseq/merged_bams_mm10_VM14/Nuc.LPA.b3/Nuc.LPA.060.b3_exons.bam	/mnt/biggie/data2/diane/ribonomics/LPA_Naive_RNAseq/merged_bams_mm10_VM14/Nuc.LPA.b3/Nuc.LPA.075.b3_exons.bam	/mnt/biggie/data2/diane/ribonomics/LPA_Naive_RNAseq/merged_bams_mm10_VM14/Nuc.LPA.b3/Nuc.LPA.090.b3_exons.bam	/mnt/biggie/data2/diane/ribonomics/LPA_Naive_RNAseq/merged_bams_mm10_VM14/Nuc.LPA.b3/Nuc.LPA.120.b3_exons.bam
+Assigned	16664068	16616807	17206711	15959662	18211039	18008796	15272734	18755071	13946611	15223969	15095528	14500997
+Unassigned_Ambiguity	202562	198805	215597	182955	216421	225908	181702	224232	163833	179630	181573	162064
+Unassigned_MultiMapping	6188971	5083418	5462302	5149533	5516340	5929410	5344831	6473783	5228520	5153158	6589644	5824431
+Unassigned_NoFeatures	30755900	23996501	22399953	28155344	33296373	24494706	24030065	24630785	22807614	22627271	36122052	33009340
+Unassigned_Unmapped	0	0	0	0	0	0	0	0	0	0	0	0
+Unassigned_MappingQuality	0	0	0	0	0	0	0	0	0	0	0	0
+Unassigned_FragmentLength	1907205	1991100	1971966	1816869	2084026	2033583	1756461	2171176	1558431	1796763	1648399	1651420
+Unassigned_Chimera	0	0	0	0	0	0	0	0	0	0	0	0
+Unassigned_Secondary	0	0	0	0	0	0	0	0	0	0	0	0
+Unassigned_Nonjunction	0	0	0	0	0	0	0	0	0	0	0	0
+Unassigned_Duplicate	0	0	0	0	0	0	0	0	0	0	0	0

@@ -1,0 +1,12 @@
+Status	/mnt/biggie/data2/diane/ribonomics/LPA_Naive_RNAseq/merged_bams_mm10_VM14/chromatin.LPA.b1/chromatin.LPA.000.b1_exons.bam	/mnt/biggie/data2/diane/ribonomics/LPA_Naive_RNAseq/merged_bams_mm10_VM14/chromatin.LPA.b1/chromatin.LPA.010.b1_exons.bam	/mnt/biggie/data2/diane/ribonomics/LPA_Naive_RNAseq/merged_bams_mm10_VM14/chromatin.LPA.b1/chromatin.LPA.015.b1_exons.bam	/mnt/biggie/data2/diane/ribonomics/LPA_Naive_RNAseq/merged_bams_mm10_VM14/chromatin.LPA.b1/chromatin.LPA.020.b1_exons.bam	/mnt/biggie/data2/diane/ribonomics/LPA_Naive_RNAseq/merged_bams_mm10_VM14/chromatin.LPA.b1/chromatin.LPA.025.b1_exons.bam	/mnt/biggie/data2/diane/ribonomics/LPA_Naive_RNAseq/merged_bams_mm10_VM14/chromatin.LPA.b1/chromatin.LPA.030.b1_exons.bam	/mnt/biggie/data2/diane/ribonomics/LPA_Naive_RNAseq/merged_bams_mm10_VM14/chromatin.LPA.b1/chromatin.LPA.035.b1_exons.bam	/mnt/biggie/data2/diane/ribonomics/LPA_Naive_RNAseq/merged_bams_mm10_VM14/chromatin.LPA.b1/chromatin.LPA.040.b1_exons.bam	/mnt/biggie/data2/diane/ribonomics/LPA_Naive_RNAseq/merged_bams_mm10_VM14/chromatin.LPA.b1/chromatin.LPA.050.b1_exons.bam	/mnt/biggie/data2/diane/ribonomics/LPA_Naive_RNAseq/merged_bams_mm10_VM14/chromatin.LPA.b1/chromatin.LPA.060.b1_exons.bam	/mnt/biggie/data2/diane/ribonomics/LPA_Naive_RNAseq/merged_bams_mm10_VM14/chromatin.LPA.b1/chromatin.LPA.090.b1_exons.bam	/mnt/biggie/data2/diane/ribonomics/LPA_Naive_RNAseq/merged_bams_mm10_VM14/chromatin.LPA.b1/chromatin.LPA.120.b1_exons.bam
+Assigned	13493307	15163154	16758408	15925695	15336512	14592088	16270157	15547216	15493186	14321112	14816039	12715216
+Unassigned_Ambiguity	175946	192019	206641	190278	196711	181375	231630	196813	227889	250356	187569	251371
+Unassigned_MultiMapping	4777372	5387822	5927848	5605724	5210957	4914472	6433791	5278668	6822955	7377920	6096425	6802302
+Unassigned_NoFeatures	36086862	39037632	42915420	42679729	38811952	39718724	40347861	35217151	39688885	34242940	45393225	31596407
+Unassigned_Unmapped	0	0	0	0	0	0	0	0	0	0	0	0
+Unassigned_MappingQuality	0	0	0	0	0	0	0	0	0	0	0	0
+Unassigned_FragmentLength	1529730	1678363	1777396	1682033	1686260	1428489	1613969	1705003	1522924	1711947	1516814	2028981
+Unassigned_Chimera	0	0	0	0	0	0	0	0	0	0	0	0
+Unassigned_Secondary	0	0	0	0	0	0	0	0	0	0	0	0
+Unassigned_Nonjunction	0	0	0	0	0	0	0	0	0	0	0	0
+Unassigned_Duplicate	0	0	0	0	0	0	0	0	0	0	0	0

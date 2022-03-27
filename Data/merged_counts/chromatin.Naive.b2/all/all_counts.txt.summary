@@ -1,0 +1,12 @@
+Status	/mnt/biggie/data2/diane/ribonomics/LPA_Naive_RNAseq/merged_bams_mm10_VM14/chromatin.Naive.b2/chromatin.Naive.000.b2_all.bam	/mnt/biggie/data2/diane/ribonomics/LPA_Naive_RNAseq/merged_bams_mm10_VM14/chromatin.Naive.b2/chromatin.Naive.010.b2_all.bam	/mnt/biggie/data2/diane/ribonomics/LPA_Naive_RNAseq/merged_bams_mm10_VM14/chromatin.Naive.b2/chromatin.Naive.015.b2_all.bam	/mnt/biggie/data2/diane/ribonomics/LPA_Naive_RNAseq/merged_bams_mm10_VM14/chromatin.Naive.b2/chromatin.Naive.020.b2_all.bam	/mnt/biggie/data2/diane/ribonomics/LPA_Naive_RNAseq/merged_bams_mm10_VM14/chromatin.Naive.b2/chromatin.Naive.025.b2_all.bam	/mnt/biggie/data2/diane/ribonomics/LPA_Naive_RNAseq/merged_bams_mm10_VM14/chromatin.Naive.b2/chromatin.Naive.030.b2_all.bam	/mnt/biggie/data2/diane/ribonomics/LPA_Naive_RNAseq/merged_bams_mm10_VM14/chromatin.Naive.b2/chromatin.Naive.040.b2_all.bam	/mnt/biggie/data2/diane/ribonomics/LPA_Naive_RNAseq/merged_bams_mm10_VM14/chromatin.Naive.b2/chromatin.Naive.050.b2_all.bam	/mnt/biggie/data2/diane/ribonomics/LPA_Naive_RNAseq/merged_bams_mm10_VM14/chromatin.Naive.b2/chromatin.Naive.060.b2_all.bam	/mnt/biggie/data2/diane/ribonomics/LPA_Naive_RNAseq/merged_bams_mm10_VM14/chromatin.Naive.b2/chromatin.Naive.075.b2_all.bam	/mnt/biggie/data2/diane/ribonomics/LPA_Naive_RNAseq/merged_bams_mm10_VM14/chromatin.Naive.b2/chromatin.Naive.090.b2_all.bam	/mnt/biggie/data2/diane/ribonomics/LPA_Naive_RNAseq/merged_bams_mm10_VM14/chromatin.Naive.b2/chromatin.Naive.120.b2_all.bam
+Assigned	40940623	65699059	67996322	50167825	61112835	53679390	61570383	58094835	69715625	61435799	60811268	59915437
+Unassigned_Ambiguity	1042103	1779133	1819523	1302856	1609652	1472182	1560071	1477917	1849477	1372791	1158676	1439812
+Unassigned_MultiMapping	3627981	5383615	6371369	4466951	5326639	5081422	5755268	6176769	6356611	6986439	6068375	6327354
+Unassigned_NoFeatures	2345903	4315937	3697234	2576906	3236760	2693882	3147450	2863717	3487522	2303878	1716881	1902705
+Unassigned_Unmapped	0	0	0	0	0	0	0	0	0	0	0	0
+Unassigned_MappingQuality	0	0	0	0	0	0	0	0	0	0	0	0
+Unassigned_FragmentLength	1470784	2253762	3380478	2457666	2742401	2691291	2945506	2744358	2253296	2696145	2745839	2750415
+Unassigned_Chimera	0	0	0	0	0	0	0	0	0	0	0	0
+Unassigned_Secondary	0	0	0	0	0	0	0	0	0	0	0	0
+Unassigned_Nonjunction	0	0	0	0	0	0	0	0	0	0	0	0
+Unassigned_Duplicate	0	0	0	0	0	0	0	0	0	0	0	0
