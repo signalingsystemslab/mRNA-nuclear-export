@@ -1,0 +1,12 @@
+Status	merged_bams_mm10_vM14/chromatin.Naive.b2/chromatin.Naive.000.b2.bam	merged_bams_mm10_vM14/chromatin.Naive.b2/chromatin.Naive.010.b2.bam	merged_bams_mm10_vM14/chromatin.Naive.b2/chromatin.Naive.015.b2.bam	merged_bams_mm10_vM14/chromatin.Naive.b2/chromatin.Naive.020.b2.bam	merged_bams_mm10_vM14/chromatin.Naive.b2/chromatin.Naive.025.b2.bam	merged_bams_mm10_vM14/chromatin.Naive.b2/chromatin.Naive.030.b2.bam	merged_bams_mm10_vM14/chromatin.Naive.b2/chromatin.Naive.040.b2.bam	merged_bams_mm10_vM14/chromatin.Naive.b2/chromatin.Naive.050.b2.bam	merged_bams_mm10_vM14/chromatin.Naive.b2/chromatin.Naive.060.b2.bam	merged_bams_mm10_vM14/chromatin.Naive.b2/chromatin.Naive.075.b2.bam	merged_bams_mm10_vM14/chromatin.Naive.b2/chromatin.Naive.090.b2.bam	merged_bams_mm10_vM14/chromatin.Naive.b2/chromatin.Naive.120.b2.bam
+Assigned	41903449	67206801	70328407	51921368	63015321	55551009	63588487	59918984	71133710	63124513	62643175	61819881
+Unassigned_Ambiguity	1056698	1801481	1852165	1326657	1636538	1497347	1586509	1501321	1868436	1394488	1182642	1473536
+Unassigned_MultiMapping	3877527	5751585	6866138	4792248	5725389	5484253	6214098	6649086	6807133	7505007	6535441	6730932
+Unassigned_NoFeatures	2350329	4322867	3706471	2583255	3244460	2701531	3156184	2873118	3495078	2313991	1725635	1909636
+Unassigned_Unmapped	0	0	0	0	0	0	0	0	0	0	0	0
+Unassigned_MappingQuality	0	0	0	0	0	0	0	0	0	0	0	0
+Unassigned_FragmentLength	239391	348772	511745	348676	406579	384027	433400	415087	358174	457053	414146	401738
+Unassigned_Chimera	0	0	0	0	0	0	0	0	0	0	0	0
+Unassigned_Secondary	0	0	0	0	0	0	0	0	0	0	0	0
+Unassigned_Nonjunction	0	0	0	0	0	0	0	0	0	0	0	0
+Unassigned_Duplicate	0	0	0	0	0	0	0	0	0	0	0	0

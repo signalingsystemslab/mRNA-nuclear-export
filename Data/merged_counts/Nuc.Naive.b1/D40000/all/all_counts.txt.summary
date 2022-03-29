@@ -1,0 +1,12 @@
+Status	merged_bams_mm10_vM14_2/Nuc.Naive.b1/Nuc.Naive.015.b1.bam	merged_bams_mm10_vM14_2/Nuc.Naive.b1/Nuc.Naive.025.b1.bam	merged_bams_mm10_vM14_2/Nuc.Naive.b1/Nuc.Naive.035.b1.bam	merged_bams_mm10_vM14_2/Nuc.Naive.b1/Nuc.Naive.050.b1.bam	merged_bams_mm10_vM14/Nuc.Naive.b1/Nuc.Naive.010.b1.bam	merged_bams_mm10_vM14/Nuc.Naive.b1/Nuc.Naive.020.b1.bam	merged_bams_mm10_vM14/Nuc.Naive.b1/Nuc.Naive.030.b1.bam	merged_bams_mm10_vM14/Nuc.Naive.b1/Nuc.Naive.040.b1.bam	merged_bams_mm10_vM14/Nuc.Naive.b1/Nuc.Naive.060.b1.bam	merged_bams_mm10_vM14/Nuc.Naive.b1/Nuc.Naive.090.b1.bam	merged_bams_mm10_vM14/Nuc.Naive.b1/Nuc.Naive.120.b1.bam
+Assigned	43729393	47031286	54820470	48064024	52457536	53416327	46649428	53761849	57361497	64313988	58876172
+Unassigned_Ambiguity	1341664	1384207	1590823	1403873	1499113	1548904	1284348	1520024	1620525	1878330	1582446
+Unassigned_MultiMapping	8057316	7597588	9485085	9819597	5881548	5980213	4858527	7259261	8717568	8787867	5808052
+Unassigned_NoFeatures	2590368	3046028	3329574	2806987	3066264	3065678	2523029	3277639	2795262	2331828	2707788
+Unassigned_Unmapped	0	0	0	0	0	0	0	0	0	0	0
+Unassigned_MappingQuality	0	0	0	0	0	0	0	0	0	0	0
+Unassigned_FragmentLength	233468	248405	271598	254819	237215	252347	240112	244670	300296	280652	252525
+Unassigned_Chimera	0	0	0	0	0	0	0	0	0	0	0
+Unassigned_Secondary	0	0	0	0	0	0	0	0	0	0	0
+Unassigned_Nonjunction	0	0	0	0	0	0	0	0	0	0	0
+Unassigned_Duplicate	0	0	0	0	0	0	0	0	0	0	0

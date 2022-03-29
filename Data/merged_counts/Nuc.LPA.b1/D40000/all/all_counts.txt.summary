@@ -1,0 +1,12 @@
+Status	merged_bams_mm10_vM14_2/Nuc.LPA.b1/Nuc.LPA.015.b1.bam	merged_bams_mm10_vM14_2/Nuc.LPA.b1/Nuc.LPA.025.b1.bam	merged_bams_mm10_vM14_2/Nuc.LPA.b1/Nuc.LPA.035.b1.bam	merged_bams_mm10_vM14_2/Nuc.LPA.b1/Nuc.LPA.050.b1.bam	merged_bams_mm10_vM14/Nuc.LPA.b1/Nuc.LPA.000.b1.bam	merged_bams_mm10_vM14/Nuc.LPA.b1/Nuc.LPA.010.b1.bam	merged_bams_mm10_vM14/Nuc.LPA.b1/Nuc.LPA.020.b1.bam	merged_bams_mm10_vM14/Nuc.LPA.b1/Nuc.LPA.030.b1.bam	merged_bams_mm10_vM14/Nuc.LPA.b1/Nuc.LPA.040.b1.bam	merged_bams_mm10_vM14/Nuc.LPA.b1/Nuc.LPA.060.b1.bam	merged_bams_mm10_vM14/Nuc.LPA.b1/Nuc.LPA.090.b1.bam	merged_bams_mm10_vM14/Nuc.LPA.b1/Nuc.LPA.120.b1.bam
+Assigned	37970217	42711596	45340520	44699797	54975112	49408752	41229029	51437789	48748708	49299155	61563286	52990295
+Unassigned_Ambiguity	1154940	1267561	1363365	1337789	1572740	1438987	1218266	1506967	1371117	1378376	1804935	1460650
+Unassigned_MultiMapping	8033716	6930697	8593789	9687720	6713575	7767123	6511080	7619604	6930749	7751518	9960226	7644070
+Unassigned_NoFeatures	2197742	2635060	2713168	2779911	3314305	2992605	2505622	2941362	2812643	2754772	2939660	2377088
+Unassigned_Unmapped	0	0	0	0	0	0	0	0	0	0	0	0
+Unassigned_MappingQuality	0	0	0	0	0	0	0	0	0	0	0	0
+Unassigned_FragmentLength	239299	235619	262563	274670	262361	287309	221729	296049	254376	256992	320581	265136
+Unassigned_Chimera	0	0	0	0	0	0	0	0	0	0	0	0
+Unassigned_Secondary	0	0	0	0	0	0	0	0	0	0	0	0
+Unassigned_Nonjunction	0	0	0	0	0	0	0	0	0	0	0	0
+Unassigned_Duplicate	0	0	0	0	0	0	0	0	0	0	0	0

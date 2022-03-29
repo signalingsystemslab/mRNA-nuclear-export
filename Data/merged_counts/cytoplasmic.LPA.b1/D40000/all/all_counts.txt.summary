@@ -1,0 +1,12 @@
+Status	merged_bams_mm10_vM14_2/cytoplasmic.LPA.b1/cytoplasmic.LPA.015.b1.bam	merged_bams_mm10_vM14_2/cytoplasmic.LPA.b1/cytoplasmic.LPA.025.b1.bam	merged_bams_mm10_vM14_2/cytoplasmic.LPA.b1/cytoplasmic.LPA.035.b1.bam	merged_bams_mm10_vM14_2/cytoplasmic.LPA.b1/cytoplasmic.LPA.050.b1.bam	merged_bams_mm10_vM14/cytoplasmic.LPA.b1/cytoplasmic.LPA.000.b1.bam	merged_bams_mm10_vM14/cytoplasmic.LPA.b1/cytoplasmic.LPA.010.b1.bam	merged_bams_mm10_vM14/cytoplasmic.LPA.b1/cytoplasmic.LPA.020.b1.bam	merged_bams_mm10_vM14/cytoplasmic.LPA.b1/cytoplasmic.LPA.030.b1.bam	merged_bams_mm10_vM14/cytoplasmic.LPA.b1/cytoplasmic.LPA.040.b1.bam	merged_bams_mm10_vM14/cytoplasmic.LPA.b1/cytoplasmic.LPA.060.b1.bam	merged_bams_mm10_vM14/cytoplasmic.LPA.b1/cytoplasmic.LPA.090.b1.bam	merged_bams_mm10_vM14/cytoplasmic.LPA.b1/cytoplasmic.LPA.120.b1.bam
+Assigned	39392558	41118564	44342659	48991395	26326677	34864077	31177201	27016734	42069825	46026452	36931514	26728055
+Unassigned_Ambiguity	1302019	1355667	1451508	1574571	814864	1066598	998093	878692	1253936	1387717	1088938	772266
+Unassigned_MultiMapping	13500287	14949492	15286045	17353472	7440474	8917727	9764989	9808336	12226257	15746755	11333456	9644824
+Unassigned_NoFeatures	843517	836977	1106364	1040991	481709	1100119	748014	596239	1253986	898480	742008	593468
+Unassigned_Unmapped	0	0	0	0	0	0	0	0	0	0	0	0
+Unassigned_MappingQuality	0	0	0	0	0	0	0	0	0	0	0	0
+Unassigned_FragmentLength	403657	424286	412831	469197	297197	349099	334485	287355	368447	467968	429732	291390
+Unassigned_Chimera	0	0	0	0	0	0	0	0	0	0	0	0
+Unassigned_Secondary	0	0	0	0	0	0	0	0	0	0	0	0
+Unassigned_Nonjunction	0	0	0	0	0	0	0	0	0	0	0	0
+Unassigned_Duplicate	0	0	0	0	0	0	0	0	0	0	0	0
