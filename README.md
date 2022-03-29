@@ -27,6 +27,6 @@ Needed external softwares:
 
 ## Step 2
 DEG requires merged counts 
-PCA DEGs and individual counts files
-Create Datasets requires merged_counts i.e. after QC
+PCA DEGs on merged counts
+Create Datasets requires merged_counts
 Script to prepare dataset from raw count of step 1 is `Data > Create Datasets.R`. This will create R objects, with normalised counted using edgeR in the `Data` folder.
