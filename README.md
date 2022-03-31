@@ -25,9 +25,17 @@ Needed external softwares:
 * multiQC
 * R (ggplot2, edgeR)
 
+## Step 2: Get List of early Lipid A inducible genes
+This step starts by creating R datasets of rpkm from the raw counts in `Data > merged_counts` using the script `Data > Create Datasets.R`.
+This script must be run from within the `Data` folder.
+
+### Requirements for Step 2
+Needed external softwares:
+* R (edgeR)
+
 -- To continue
 
-## Step 2
+
 DEG requires merged counts 
 PCA DEGs on merged counts
 Create Datasets requires merged_counts
