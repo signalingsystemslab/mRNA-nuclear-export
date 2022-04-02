@@ -27,16 +27,18 @@ Needed external softwares:
 
 ## Step 2: Get List of early Lipid A inducible genes
 This step starts by creating R datasets of rpkm from the raw counts in `Data > merged_counts` using the script `Data > Create Datasets.R`.
-This script must be run from within the `Data` folder.
+This script must be run from within the `Data` folder. This will create R objects, with normalised counted using edgeR in the `Data` folder.  
+A list of differential expressed genes base on Naive chromatin data was generated with the script in `Data > DE_more_stringent.R`. This list was then manually curated to remove potential false positive.
 
 ### Requirements for Step 2
 Needed external softwares:
-* R (edgeR)
+* R (edgeR, biomaRT)
 
 -- To continue
 
 
 DEG requires merged counts 
+create dataset 5kb
+
 PCA DEGs on merged counts
-Create Datasets requires merged_counts
-Script to prepare dataset from raw count of step 1 is `Data > Create Datasets.R`. This will create R objects, with normalised counted using edgeR in the `Data` folder.
+
