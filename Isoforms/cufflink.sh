@@ -9,6 +9,7 @@ function cufflink_fun {
     mkdir -p $DIRNAME
     mkdir -p $DIRNAME/$NAME
     cufflinks $1 -p 4 -G /opt/ngs_indexes/models/mm/mm10/gencode.vM14.annotation.gtf -o $DIRNAME/$NAME -u -b /opt/ngs_indexes/genomes/mm/mm10_no_alt_analysis_set_ENCODE.fasta  --library-type fr-firststrand 
+    gzip -9 $DIRNAME/$NAME/isoforms.fpkm_tracking
 }
 
 export -f cufflink_fun
