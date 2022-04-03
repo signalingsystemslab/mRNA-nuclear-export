@@ -34,11 +34,30 @@ A list of differential expressed genes base on Naive chromatin data was generate
 Needed external softwares:
 * R (edgeR, biomaRT)
 
+## Step 3: Get last 5kb
+This step aimed at at removing potential bias due to partially trasncribed chromatin associated transcripts (i.e. not yet ready to be exported towards the nucleoplasm):
+* Identify expressed cytoplasmic transcripts with cufflinks see `Isoforms > cufflinks.sh` for exact options. Cufflinks results are given in the various sub folders under `Isoforms`. All these individual results were aggregated for all samples and filtered to keep only genes in the list of inducible LPA genes, defined in previous step. 
+* Manually curate TSS, TES (compared to gencode annotations) and expressed transcripts (compared to cufflinks output) see `Manual Curation`
+* To compare manually curated TSS and TES to external database see `Comparison with TSS-TES DB > TSS_polyA_distance_for_table.R` folder, the relevant information was extracted from the manual curation as `Comparison with TSS-TES DB > Gene_for_polyA_TSS_distance.txt`. While bed files from the `Comparison with TSS-TES DB > polyAsite_atlas.cluster.mm10.2-0.bed.gz` was dowloaded from PolyASite[https://polyasite.unibas.ch/atlas#3] and `Comparison with TSS-TES DB > refTSS_v3-1_mouse_coordinate.mm10.bed.gz` was download from RefTSS[http://reftss.clst.riken.jp/reftss/Main_Page]. The r script must be run from within its parent folder.
+* Then extract gtf corresponding to the last 5kb to get counts see `Last_5kb` folder. The relevant information was extracted from the manual curation as `Last_5kb > gene_list_final_lpa.txt`.
+
+export annotation and counts and generated rpkm/cpm
+
+### Requiremetnts for Step3
+Needed external softwares:
+* cufflinks
+* Python 3.7 (glob, gzip)
+* IGV (for manual curation of TSS and TES)
+* featuresCounts
+* R (ggplot2, gridExtra, grid, scales)
+
+
+
+
 -- To continue
 
 
-DEG requires merged counts 
 create dataset 5kb
 
-PCA DEGs on merged counts
+Figure: PCA DEGs on merged counts
 
