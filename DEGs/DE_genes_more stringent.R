@@ -127,3 +127,7 @@ top_table_summary <- top_table_summary[order(top_table_summary$Name),]
 
 write.csv(top_table_summary, file = 'top_table_summary.csv', row.names = F)
 
+
+gene_list_with_strand <- top_table_up_Naive_all_edgeR_FC10_RPKM1_FDR0.01_protein_coding[, c("Geneid", "Strand")]
+gene_list_with_strand <- gene_list_with_strand[match(top_table_summary$Geneid, gene_list_with_strand$Geneid),]
+write.table(file = '../Isoforms/gene_list_with_strand.txt', x=gene_list_with_strand, row.names = F, col.names = F, sep='\t', quote=F)
