@@ -42,17 +42,24 @@ This step aimed at at removing potential bias due to partially trasncribed chrom
 * Then extract gtf corresponding to the last 5kb to get counts see `Last_5kb` folder. The relevant information was extracted from the manual curation as `Last_5kb > gene_list_final_naive.txt` and  `Last_5kb > gene_list_final_lpa.txt`. The annotations ([gencode.vM14.gtf](https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_mouse/release_M14/gencode.vM14.annotation.gtf.gz)) were filtered to include only the last 5kp of the relevant genes based on those list and these new subsetted annotation were used to get counts of sequencing reads falling with those regions using featureCounts, see `Last_5kb > run_gtf5kb.sh` and `Last_5kb > get_5kb_gtf_with_dedup.py`. The resulting count files are given in `Data > merged_counts`. 
 * R datasets based on those last 5kb read were generated using the script 'Data > Create Datasets Last 5kb.R` which must be run from within the `Data` folder.
 
-### Requiremetnts for Step3
+### Requirements for Step 3
 Needed external softwares:
 * cufflinks
 * Python 3.7 (glob, gzip, re, argparse)
 * IGV (for manual curation of TSS and TES)
 * featuresCounts
-* R (ggplot2, gridExtra, grid, scales, edgeR)
+* R (ggplot2, gridExtra, grid, scales, edgeR, biomaRT)
 
 ## Step 4: Model fitting
+Fitting can be done by running the script `Modeling > Main_weighting_for_smoothing_include_negbinom_error_in_model_reps.R` from the `Modeling` folder with this command `Rscript Main_weighting_for_smoothing_include_negbinom_error_in_model_reps.R i ri cond folder rep` where `i` is the gene index to be fittes, `ri` is the number of random initialisation to do, `cond` is the condition to use,  `folder` is the output folder for the results, `rep` is the replicate to fit.   
+For example: `Rscript Main_weighting_for_smoothing_include_negbinom_error_in_model_reps.R 1 1000 naive Results rep1`
+All the results obtianed from this step are located under `Modeling > Results`.
 
+### Requirements for Step 4
+Needed external softwares:
+* R (compiler, deSolve)
 
+## Step 5: Sensitivity analysis
 
 -- To continue
 

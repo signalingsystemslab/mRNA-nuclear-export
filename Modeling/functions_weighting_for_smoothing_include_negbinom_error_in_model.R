@@ -157,20 +157,20 @@ fn_all_ode_cp <- cmpfun(fn_all_ode)
 
 ## Cost functions
 
-TSE_bs <- function(par, fn_fit, data, time_data, batch, results="sum", library_size, length, ...){
+TSE_reps <- function(par, fn_fit, data, time_data, replicate, results="sum", library_size, length, ...){
   # par:
   # fn_fit:
   # data: data of all replicates
   # time_data: 
-  # batch: 
+  # replicate: 
   # results: 
   # library_size: library size for each sample, need to be subsetted for that condition 
   # length:
   # ...: 
   
-  # check if the batch has np data or not
+  # check if the replicate has np data or not
   no_np <- FALSE
-  if(batch == 'b2'){
+  if(replicate == 'rep3'){
     no_np <- TRUE
   }
   
@@ -181,15 +181,15 @@ TSE_bs <- function(par, fn_fit, data, time_data, batch, results="sum", library_s
   
   par <- par[-c(1:3)]
   
-  # keep al data and extract the data corresponding to the wanted batch
+  # keep al data and extract the data corresponding to the wanted replicate
   data_rpkm_all <- data
-  if(batch != 'all'){
-    b <- as.numeric(gsub('b','',batch)) 
+  if(replicate != 'all'){
+    b <- as.numeric(gsub('rep','',replicate)) 
     data <- lapply(data_rpkm_all, function(l){l[,c(1,1+b)]})
   }
   
   # create data.frame of caRNA for the weight for the smooting
-  dat_g_exp <- data.frame(Time=rep(data_rpkm_all$caRNA[,1], ncol(data_rpkm_all$caRNA)-1), RPKM = as.vector(data_rpkm_all$caRNA[,-1]), batch = rep(c("b1", "b2", "b3"), each=nrow(data_rpkm_all$caRNA)))
+  dat_g_exp <- data.frame(Time=rep(data_rpkm_all$caRNA[,1], ncol(data_rpkm_all$caRNA)-1), RPKM = as.vector(data_rpkm_all$caRNA[,-1]), replicate = rep(c("rep1", "rep2", "rep3"), each=nrow(data_rpkm_all$caRNA)))
  
   tryCatch({
     # times to extrapolate, every second
@@ -211,9 +211,9 @@ TSE_bs <- function(par, fn_fit, data, time_data, batch, results="sum", library_s
     data_extrapolation <- data_extrapolation[!to_remove,]
     
     # extract library size #takes time because dataframe -> changed to mat
-    # libsize <- as.integer(floor((library_size$lib.size*library_size$norm.factors)[unlist(sapply(1:nrow(dat_g_exp),function(i){tmp <- grep(pattern = paste0('chromatin.*', '.',paste0(rep(0,3-nchar(as.character(dat_g_exp$Time[i]))), collapse = ''), as.character(dat_g_exp$Time[i]),'.',dat_g_exp$batch[i]), x = library_size$samples, ignore.case = T); if (length(tmp)==0){return(NA)}else{return(tmp)}}))]))
-    dat_g_exp_pattern <- paste0('chromatin', '.',sapply(nchar(as.character(dat_g_exp$Time)),function(x){paste0(rep(0,3-x),collapse='')}), as.character(dat_g_exp$Time),'.',dat_g_exp$batch)
-    # dat_g_exp_pattern_2 <- sapply(1:nrow(dat_g_exp),function(i){paste0('chromatin.*', '.',paste0(rep(0,3-nchar(as.character(dat_g_exp$Time[i]))), collapse = ''), as.character(dat_g_exp$Time[i]),'.',dat_g_exp$batch[i])})
+    # libsize <- as.integer(floor((library_size$lib.size*library_size$norm.factors)[unlist(sapply(1:nrow(dat_g_exp),function(i){tmp <- grep(pattern = paste0('chromatin.*', '.',paste0(rep(0,3-nchar(as.character(dat_g_exp$Time[i]))), collapse = ''), as.character(dat_g_exp$Time[i]),'.',dat_g_exp$replicate[i]), x = library_size$samples, ignore.case = T); if (length(tmp)==0){return(NA)}else{return(tmp)}}))]))
+    dat_g_exp_pattern <- paste0('chromatin', '.',sapply(nchar(as.character(dat_g_exp$Time)),function(x){paste0(rep(0,3-x),collapse='')}), as.character(dat_g_exp$Time),'.',dat_g_exp$replicate)
+    # dat_g_exp_pattern_2 <- sapply(1:nrow(dat_g_exp),function(i){paste0('chromatin.*', '.',paste0(rep(0,3-nchar(as.character(dat_g_exp$Time[i]))), collapse = ''), as.character(dat_g_exp$Time[i]),'.',dat_g_exp$replicate[i])})
     # lib_indices <- sapply(1:nrow(dat_g_exp),function(i){tmp <- grep(pattern = dat_g_exp_pattern[i], x = row.names(library_size), ignore.case = T); if (length(tmp)==0){return(NA)}else{return(tmp)}})
     lib_indices <- match(dat_g_exp_pattern, row.names(library_size))
     libsize <- as.integer(floor((library_size[,"lib.size"]*library_size[,"norm.factors"])[lib_indices]))
@@ -225,19 +225,19 @@ TSE_bs <- function(par, fn_fit, data, time_data, batch, results="sum", library_s
     # prob_rpkm_lb <- log2(sapply(1:nrow(dat_g_exp), function(i){10^6*10^3/length * qbeta( p = 0.25, shape1 = 2^dat_g_exp$RPKM[i] * length/10^3 * libsize[i]/10^6 + 1, shape2 = libsize[i] - 2^dat_g_exp$RPKM[i] * length/10^3 * libsize[i]/10^6 + 1, lower.tail=T)}))
     
     res <- vector(mode = "list", length=ncol(data$caRNA)-1)
-    # for each batch
+    # for each replicate
     for (b in 2:(ncol(data$caRNA))){
-      # extrapolate caRNA for specific batch 
+      # extrapolate caRNA for specific replicate 
       data_extra <- data.frame(x=as.vector(data_extrapolation[,1]), y=as.vector(data_extrapolation[,b]))
       data_extra <- data_extra[!is.na(data_extra$y),]
 
       # calculate weight as 1/IQR(p) saturating at 10
       if(ncol(data$caRNA) > 2){
-        weight <- proba[dat_g_exp$batch == paste0('b',b-1)]
-        # weight <- sapply(1:length(prob_rpkm_ub),function(i){1/max(0.1,prob_rpkm_ub[i]-prob_rpkm_lb[i])})[dat_g_exp$batch == paste0('b',b-1)] # don't go to low values
+        weight <- proba[dat_g_exp$replicate == paste0('rep',b-1)]
+        # weight <- sapply(1:length(prob_rpkm_ub),function(i){1/max(0.1,prob_rpkm_ub[i]-prob_rpkm_lb[i])})[dat_g_exp$replicate == paste0('rep',b-1)] # don't go to low values
       }else{
-        weight <- proba[dat_g_exp$batch == batch]
-        # weight <- sapply(1:length(prob_rpkm_ub),function(i){1/max(0.1,prob_rpkm_ub[i]-prob_rpkm_lb[i])})[dat_g_exp$batch == batch] # don't go to low values
+        weight <- proba[dat_g_exp$replicate == replicate]
+        # weight <- sapply(1:length(prob_rpkm_ub),function(i){1/max(0.1,prob_rpkm_ub[i]-prob_rpkm_lb[i])})[dat_g_exp$replicate == replicate] # don't go to low values
       }
       weight <- weight/max(weight, na.rm=T)
       # add max weigth to the missing t=0 values replaced by parameter (i.e. sure values)
@@ -308,12 +308,12 @@ TSE_bs <- function(par, fn_fit, data, time_data, batch, results="sum", library_s
           # print(cbind(fit[match(data[[cpt]][,"t"], time_data), cpt], data[[cpt]]))
           
           # takes time because data.frame
-          # libsize <- as.integer(floor((library_size$lib.size*library_size$norm.factors)[unlist(sapply(1:nrow(dat_g_exp),function(i){tmp <- grep(pattern = paste0(cpt_name,'.*', '.',paste0(rep(0,3-nchar(as.character(dat_g_exp$Time[i]))), collapse = ''),  as.character(dat_g_exp$Time[i]),'.',dat_g_exp$batch[i]), x = library_size$samples, ignore.case = T); if (length(tmp)==0){return(NA)}else{return(tmp)}}))]))[dat_g_exp$batch == paste0('b',b-1)]
-          # libsize <- as.integer(floor((library_size[,"lib.size"]*library_size[,"norm.factors"])[unlist(sapply(1:nrow(dat_g_exp),function(i){tmp <- grep(pattern = paste0(cpt_name, '.',paste0(rep(0,3-nchar(as.character(dat_g_exp$Time[i]))), collapse = ''),  as.character(dat_g_exp$Time[i]),'.',dat_g_exp$batch[i]), x = row.names(library_size), ignore.case = T); if (length(tmp)==0){return(NA)}else{return(tmp)}}))]))[dat_g_exp$batch == paste0('b',b-1)]
-          dat_g_exp_pattern <- paste0(cpt_name, '.',sapply(nchar(as.character(dat_g_exp$Time)),function(x){paste0(rep(0,3-x),collapse='')}), as.character(dat_g_exp$Time),'.', dat_g_exp$batch)
+          # libsize <- as.integer(floor((library_size$lib.size*library_size$norm.factors)[unlist(sapply(1:nrow(dat_g_exp),function(i){tmp <- grep(pattern = paste0(cpt_name,'.*', '.',paste0(rep(0,3-nchar(as.character(dat_g_exp$Time[i]))), collapse = ''),  as.character(dat_g_exp$Time[i]),'.',dat_g_exp$replicate[i]), x = library_size$samples, ignore.case = T); if (length(tmp)==0){return(NA)}else{return(tmp)}}))]))[dat_g_exp$replicate == paste0('rep',b-1)]
+          # libsize <- as.integer(floor((library_size[,"lib.size"]*library_size[,"norm.factors"])[unlist(sapply(1:nrow(dat_g_exp),function(i){tmp <- grep(pattern = paste0(cpt_name, '.',paste0(rep(0,3-nchar(as.character(dat_g_exp$Time[i]))), collapse = ''),  as.character(dat_g_exp$Time[i]),'.',dat_g_exp$replicate[i]), x = row.names(library_size), ignore.case = T); if (length(tmp)==0){return(NA)}else{return(tmp)}}))]))[dat_g_exp$replicate == paste0('rep',b-1)]
+          dat_g_exp_pattern <- paste0(cpt_name, '.',sapply(nchar(as.character(dat_g_exp$Time)),function(x){paste0(rep(0,3-x),collapse='')}), as.character(dat_g_exp$Time),'.', dat_g_exp$replicate)
           # lib_indices <- sapply(1:nrow(dat_g_exp),function(i){tmp <- grep(pattern = dat_g_exp_pattern[i], x = row.names(library_size), ignore.case = T); if (length(tmp)==0){return(NA)}else{return(tmp)}})
           lib_indices <- match(dat_g_exp_pattern, row.names(library_size))
-          libsize <- as.integer(floor((library_size[,"lib.size"]*library_size[,"norm.factors"])[lib_indices]))[dat_g_exp$batch == paste0('b',b-1)]
+          libsize <- as.integer(floor((library_size[,"lib.size"]*library_size[,"norm.factors"])[lib_indices]))[dat_g_exp$replicate == paste0('rep',b-1)]
           
           res[[b-1]] <- c(res[[b-1]], TSE_neg_binom_cp(fit[match(data[[cpt]][,"t"], time_data), cpt], fit_deriv[match(data[[cpt]][,"t"], time_data), cpt],  data[[cpt]][,b], libsize, length, sigmab, sigmat))
         }else{
@@ -331,14 +331,14 @@ TSE_bs <- function(par, fn_fit, data, time_data, batch, results="sum", library_s
       # v2
       res <- res - log(2*1/(5*sqrt(2*pi))) + sigmat^2/(2*5^2) - log(2/(0.1*sqrt(2*pi))) + sigmab^2/(2*0.1^2) - log(1/(sqrt(2*pi)*0.05)) + (span - 0.45)^2/(2*0.05^2)
       
-      # add regul on b1_ca0 based the other ca_0
+      # add regul on rep1_ca0 based the other ca_0
       if(any(is.na(data$caRNA[data$caRNA[,1]==0,]))){
         ca_other_0 <- data_rpkm_all$caRNA[data_rpkm_all$caRNA[,1]==0,-1] 
         ca_other_10 <- data_rpkm_all$caRNA[data_rpkm_all$caRNA[,1]==10,-1] 
         
         delta <- mean(ca_other_0 - ca_other_10, na.rm=T)
         
-        # libsize <- mean(as.integer(floor((library_size$lib.size*library_size$norm.factors)[unlist(sapply(1:nrow(dat_g_exp),function(i){tmp <- grep(pattern = paste0('chromatin.*', '.',paste0(rep(0,3-nchar(as.character(dat_g_exp$Time[i]))), collapse = ''),  as.character(dat_g_exp$Time[i]),'.',dat_g_exp$batch[i]), x = library_size$samples, ignore.case = T); if (length(tmp)==0){return(NA)}else{return(tmp)}}))]))[dat_g_exp$Time == 0], na.rm=T)
+        # libsize <- mean(as.integer(floor((library_size$lib.size*library_size$norm.factors)[unlist(sapply(1:nrow(dat_g_exp),function(i){tmp <- grep(pattern = paste0('chromatin.*', '.',paste0(rep(0,3-nchar(as.character(dat_g_exp$Time[i]))), collapse = ''),  as.character(dat_g_exp$Time[i]),'.',dat_g_exp$replicate[i]), x = library_size$samples, ignore.case = T); if (length(tmp)==0){return(NA)}else{return(tmp)}}))]))[dat_g_exp$Time == 0], na.rm=T)
     
         # proba <- pbeta( q = 2^(delta + data$caRNA[data$caRNA[,1]==10, is.na(data$caRNA[data$caRNA[,1]==0,])])* length / 10^3 / 10^6, shape1 = 2^(delta + data$caRNA[data$caRNA[,1]==10, is.na(data$caRNA[data$caRNA[,1]==0,])]) * length/10^3 * libsize/10^6 + 1, shape2 = libsize - 2^(delta + data$caRNA[data$caRNA[,1]==10, is.na(data$caRNA[data$caRNA[,1]==0,])]) * length/10^3 * libsize/10^6 + 1)
 
@@ -365,23 +365,23 @@ TSE_bs <- function(par, fn_fit, data, time_data, batch, results="sum", library_s
     return(res)
   }, error=function(e){return(10^16)})
 }
-TSE_bs_cp <- cmpfun(TSE_bs)
+TSE_reps_cp <- cmpfun(TSE_reps)
 
 
-TSE_bs_theo <- function(par, data, time_data, batch, results="sum", library_size, length, ...){
+TSE_reps_theo <- function(par, data, time_data, replicate, results="sum", library_size, length, ...){
   # par:
   # fn_fit:
   # data: data of all replicates
   # time_data: 
-  # batch: 
+  # replicate: 
   # results: 
   # library_size: library size for each sample, need to be subsetted for that condition 
   # length:
   # ...: 
   
-  # check if the batch has np data or not
+  # check if the replicate has np data or not
   no_np <- FALSE
-  if(batch == 'b2'){
+  if(replicate == 'rep3'){
     no_np <- TRUE
   }
   
@@ -392,15 +392,15 @@ TSE_bs_theo <- function(par, data, time_data, batch, results="sum", library_size
   
   par <- par[-c(1:3)]
   
-  # keep al data and extract the data corresponding to the wanted batch
+  # keep al data and extract the data corresponding to the wanted replicate
   data_rpkm_all <- data
-  if(batch != 'all'){
-    b <- as.numeric(gsub('b','',batch)) 
+  if(replicate != 'all'){
+    b <- as.numeric(gsub('rep','',replicate)) 
     data <- lapply(data_rpkm_all, function(l){l[,c(1,1+b)]})
   }
   
   # create data.frame of caRNA for the weight for the smooting
-  dat_g_exp <- data.frame(Time=rep(data_rpkm_all$caRNA[,1], ncol(data_rpkm_all$caRNA)-1), RPKM = as.vector(data_rpkm_all$caRNA[,-1]), batch = rep(c("b1", "b2", "b3"), each=nrow(data_rpkm_all$caRNA)))
+  dat_g_exp <- data.frame(Time=rep(data_rpkm_all$caRNA[,1], ncol(data_rpkm_all$caRNA)-1), RPKM = as.vector(data_rpkm_all$caRNA[,-1]), replicate = rep(c("rep1", "rep2", "rep3"), each=nrow(data_rpkm_all$caRNA)))
   
   tryCatch({
     # times to extrapolate, every second
@@ -422,9 +422,9 @@ TSE_bs_theo <- function(par, data, time_data, batch, results="sum", library_size
     data_extrapolation <- data_extrapolation[!to_remove,]
     
     # extract library size 
-    # libsize <- as.integer(floor((library_size$lib.size*library_size$norm.factors)[unlist(sapply(1:nrow(dat_g_exp),function(i){tmp <- grep(pattern = paste0('chromatin.*', '.',paste0(rep(0,3-nchar(as.character(dat_g_exp$Time[i]))), collapse = ''), as.character(dat_g_exp$Time[i]),'.',dat_g_exp$batch[i]), x = library_size$samples, ignore.case = T); if (length(tmp)==0){return(NA)}else{return(tmp)}}))]))
-    dat_g_exp_pattern <- paste0('chromatin', '.',sapply(nchar(as.character(dat_g_exp$Time)),function(x){paste0(rep(0,3-x),collapse='')}), as.character(dat_g_exp$Time),'.',dat_g_exp$batch)
-    # dat_g_exp_pattern_2 <- sapply(1:nrow(dat_g_exp),function(i){paste0('chromatin.*', '.',paste0(rep(0,3-nchar(as.character(dat_g_exp$Time[i]))), collapse = ''), as.character(dat_g_exp$Time[i]),'.',dat_g_exp$batch[i])})
+    # libsize <- as.integer(floor((library_size$lib.size*library_size$norm.factors)[unlist(sapply(1:nrow(dat_g_exp),function(i){tmp <- grep(pattern = paste0('chromatin.*', '.',paste0(rep(0,3-nchar(as.character(dat_g_exp$Time[i]))), collapse = ''), as.character(dat_g_exp$Time[i]),'.',dat_g_exp$replicate[i]), x = library_size$samples, ignore.case = T); if (length(tmp)==0){return(NA)}else{return(tmp)}}))]))
+    dat_g_exp_pattern <- paste0('chromatin', '.',sapply(nchar(as.character(dat_g_exp$Time)),function(x){paste0(rep(0,3-x),collapse='')}), as.character(dat_g_exp$Time),'.',dat_g_exp$replicate)
+    # dat_g_exp_pattern_2 <- sapply(1:nrow(dat_g_exp),function(i){paste0('chromatin.*', '.',paste0(rep(0,3-nchar(as.character(dat_g_exp$Time[i]))), collapse = ''), as.character(dat_g_exp$Time[i]),'.',dat_g_exp$replicate[i])})
     # lib_indices <- sapply(1:nrow(dat_g_exp),function(i){tmp <- grep(pattern = dat_g_exp_pattern[i], x = row.names(library_size), ignore.case = T); if (length(tmp)==0){return(NA)}else{return(tmp)}})
     lib_indices <- match(dat_g_exp_pattern, row.names(library_size))
     libsize <- as.integer(floor((library_size[,"lib.size"]*library_size[,"norm.factors"])[lib_indices]))
@@ -437,19 +437,19 @@ TSE_bs_theo <- function(par, data, time_data, batch, results="sum", library_size
     # prob_rpkm_lb <- log2(sapply(1:nrow(dat_g_exp), function(i){10^6*10^3/length * qbeta( p = 0.25, shape1 = 2^dat_g_exp$RPKM[i] * length/10^3 * libsize[i]/10^6 + 1, shape2 = libsize[i] - 2^dat_g_exp$RPKM[i] * length/10^3 * libsize[i]/10^6 + 1, lower.tail=T)}))
     
     res <- vector(mode = "list", length=ncol(data$caRNA)-1)
-    # for each batch
+    # for each replicate
     for (b in 2:(ncol(data$caRNA))){
-      # extrapolate caRNA for specific batch 
+      # extrapolate caRNA for specific replicate 
       data_extra <- data.frame(x=as.vector(data_extrapolation[,1]), y=as.vector(data_extrapolation[,b]))
       data_extra <- data_extra[!is.na(data_extra$y),]
       
       # calculate weight as 1/IQR(p) saturating at 10
       if(ncol(data$caRNA) > 2){
-        weight <- proba[dat_g_exp$batch == paste0('b',b-1)]
-        # weight <- sapply(1:length(prob_rpkm_ub),function(i){1/max(0.1,prob_rpkm_ub[i]-prob_rpkm_lb[i])})[dat_g_exp$batch == paste0('b',b-1)] # don't go to low values
+        weight <- proba[dat_g_exp$replicate == paste0('rep',b-1)]
+        # weight <- sapply(1:length(prob_rpkm_ub),function(i){1/max(0.1,prob_rpkm_ub[i]-prob_rpkm_lb[i])})[dat_g_exp$replicate == paste0('rep',b-1)] # don't go to low values
       }else{
-        weight <- proba[dat_g_exp$batch == batch]
-        # weight <- sapply(1:length(prob_rpkm_ub),function(i){1/max(0.1,prob_rpkm_ub[i]-prob_rpkm_lb[i])})[dat_g_exp$batch == batch] # don't go to low values
+        weight <- proba[dat_g_exp$replicate == replicate]
+        # weight <- sapply(1:length(prob_rpkm_ub),function(i){1/max(0.1,prob_rpkm_ub[i]-prob_rpkm_lb[i])})[dat_g_exp$replicate == replicate] # don't go to low values
       }
       weight <- weight/max(weight, na.rm=T)
       # add max weigth to the missing t=0 values replaced by parameter (i.e. sure values)
@@ -480,12 +480,12 @@ TSE_bs_theo <- function(par, data, time_data, batch, results="sum", library_size
           }
           # print(cbind(fit[match(data[[cpt]][,"t"], time_data), cpt], data[[cpt]]))
           
-          # libsize <- as.integer(floor((library_size$lib.size*library_size$norm.factors)[unlist(sapply(1:nrow(dat_g_exp),function(i){tmp <- grep(pattern = paste0(cpt_name,'.*', '.',paste0(rep(0,3-nchar(as.character(dat_g_exp$Time[i]))), collapse = ''),  as.character(dat_g_exp$Time[i]),'.',dat_g_exp$batch[i]), x = library_size$samples, ignore.case = T); if (length(tmp)==0){return(NA)}else{return(tmp)}}))]))[dat_g_exp$batch == paste0('b',b-1)]
+          # libsize <- as.integer(floor((library_size$lib.size*library_size$norm.factors)[unlist(sapply(1:nrow(dat_g_exp),function(i){tmp <- grep(pattern = paste0(cpt_name,'.*', '.',paste0(rep(0,3-nchar(as.character(dat_g_exp$Time[i]))), collapse = ''),  as.character(dat_g_exp$Time[i]),'.',dat_g_exp$replicate[i]), x = library_size$samples, ignore.case = T); if (length(tmp)==0){return(NA)}else{return(tmp)}}))]))[dat_g_exp$replicate == paste0('rep',b-1)]
           
-          dat_g_exp_pattern <- paste0(cpt_name, '.',sapply(nchar(as.character(dat_g_exp$Time)),function(x){paste0(rep(0,3-x),collapse='')}), as.character(dat_g_exp$Time),'.', dat_g_exp$batch)
+          dat_g_exp_pattern <- paste0(cpt_name, '.',sapply(nchar(as.character(dat_g_exp$Time)),function(x){paste0(rep(0,3-x),collapse='')}), as.character(dat_g_exp$Time),'.', dat_g_exp$replicate)
           # lib_indices <- sapply(1:nrow(dat_g_exp),function(i){tmp <- grep(pattern = dat_g_exp_pattern[i], x = row.names(library_size), ignore.case = T); if (length(tmp)==0){return(NA)}else{return(tmp)}})
           lib_indices <- match(dat_g_exp_pattern, row.names(library_size))
-          libsize <- as.integer(floor((library_size[,"lib.size"]*library_size[,"norm.factors"])[lib_indices]))[dat_g_exp$batch == paste0('b',b-1)]
+          libsize <- as.integer(floor((library_size[,"lib.size"]*library_size[,"norm.factors"])[lib_indices]))[dat_g_exp$replicate == paste0('rep',b-1)]
           
           
           res[[b-1]] <- c(res[[b-1]], TSE_poisson_cp(fit[match(data[[cpt]][,"t"], time_data), cpt],  data[[cpt]][,b], libsize, length))
@@ -504,14 +504,14 @@ TSE_bs_theo <- function(par, data, time_data, batch, results="sum", library_size
       # v2
       res <- res - log(2*1/(5*sqrt(2*pi))) + sigmat^2/(2*5^2) - log(2/(0.1*sqrt(2*pi))) + sigmab^2/(2*0.1^2) - log(1/(sqrt(2*pi)*0.05)) + (span - 0.45)^2/(2*0.05^2)
       
-      # add regul on b1_ca0 based the other ca_0
+      # add regul on rep1_ca0 based the other ca_0
       if(any(is.na(data$caRNA[data$caRNA[,1]==0, is.na(data$caRNA[data$caRNA[,1]==0,])]))){
         ca_other_0 <- data_rpkm_all$caRNA[data_rpkm_all$caRNA[,1]==0,-1] 
         ca_other_10 <- data_rpkm_all$caRNA[data_rpkm_all$caRNA[,1]==10,-1] 
         
         delta <- mean(ca_other_0 - ca_other_10, na.rm=T)
         
-        # libsize <- mean(as.integer(floor((library_size$lib.size*library_size$norm.factors)[unlist(sapply(1:nrow(dat_g_exp),function(i){tmp <- grep(pattern = paste0('chromatin.*', '.',paste0(rep(0,3-nchar(as.character(dat_g_exp$Time[i]))), collapse = ''),  as.character(dat_g_exp$Time[i]),'.',dat_g_exp$batch[i]), x = library_size$samples, ignore.case = T); if (length(tmp)==0){return(NA)}else{return(tmp)}}))]))[dat_g_exp$Time == 0], na.rm=T)
+        # libsize <- mean(as.integer(floor((library_size$lib.size*library_size$norm.factors)[unlist(sapply(1:nrow(dat_g_exp),function(i){tmp <- grep(pattern = paste0('chromatin.*', '.',paste0(rep(0,3-nchar(as.character(dat_g_exp$Time[i]))), collapse = ''),  as.character(dat_g_exp$Time[i]),'.',dat_g_exp$replicate[i]), x = library_size$samples, ignore.case = T); if (length(tmp)==0){return(NA)}else{return(tmp)}}))]))[dat_g_exp$Time == 0], na.rm=T)
         
         # proba <- pbeta( q = 2^(delta + data$caRNA[data$caRNA[,1]==10, is.na(data$caRNA[data$caRNA[,1]==0,])])* length / 10^3 / 10^6, shape1 = 2^(delta + data$caRNA[data$caRNA[,1]==10, is.na(data$caRNA[data$caRNA[,1]==0,])]) * length/10^3 * libsize/10^6 + 1, shape2 = libsize - 2^(delta + data$caRNA[data$caRNA[,1]==10, is.na(data$caRNA[data$caRNA[,1]==0,])]) * length/10^3 * libsize/10^6 + 1)
         
@@ -533,22 +533,22 @@ TSE_bs_theo <- function(par, data, time_data, batch, results="sum", library_size
     return(res)
   }, error=function(e){return(10^16)})
 }
-TSE_bs_theo_cp <- cmpfun(TSE_bs_theo)
+TSE_reps_theo_cp <- cmpfun(TSE_reps_theo)
 
-TSE_bs_theo_bt <- function(par, fn_fit, data, time_data, batch, results="sum", library_size, length, ...){
+TSE_reps_theo_bt <- function(par, fn_fit, data, time_data, replicate, results="sum", library_size, length, ...){
   # par:
   # fn_fit:
   # data: data of all replicates
   # time_data: 
-  # batch: 
+  # replicate: 
   # results: 
   # library_size: library size for each sample, need to be subsetted for that condition 
   # length:
   # ...: 
   
-  # check if the batch has np data or not
+  # check if the replicate has np data or not
   no_np <- FALSE
-  if(batch == 'b2'){
+  if(replicate == 'rep3'){
     no_np <- TRUE
   }
   
@@ -559,15 +559,15 @@ TSE_bs_theo_bt <- function(par, fn_fit, data, time_data, batch, results="sum", l
   
   par <- par[-c(1:3)]
   
-  # keep al data and extract the data corresponding to the wanted batch
+  # keep al data and extract the data corresponding to the wanted replicate
   data_rpkm_all <- data
-  if(batch != 'all'){
-    b <- as.numeric(gsub('b','',batch)) 
+  if(replicate != 'all'){
+    b <- as.numeric(gsub('rep','',replicate)) 
     data <- lapply(data_rpkm_all, function(l){l[,c(1,1+b)]})
   }
   
   # create data.frame of caRNA for the weight for the smooting
-  dat_g_exp <- data.frame(Time=rep(data_rpkm_all$caRNA[,1], ncol(data_rpkm_all$caRNA)-1), RPKM = as.vector(data_rpkm_all$caRNA[,-1]), batch = rep(c("b1", "b2", "b3"), each=nrow(data_rpkm_all$caRNA)))
+  dat_g_exp <- data.frame(Time=rep(data_rpkm_all$caRNA[,1], ncol(data_rpkm_all$caRNA)-1), RPKM = as.vector(data_rpkm_all$caRNA[,-1]), replicate = rep(c("rep1", "rep2", "rep3"), each=nrow(data_rpkm_all$caRNA)))
   
   tryCatch({
     # times to extrapolate, every second
@@ -589,13 +589,13 @@ TSE_bs_theo_bt <- function(par, fn_fit, data, time_data, batch, results="sum", l
     data_extrapolation <- data_extrapolation[!to_remove,]
     
     # extract library size 
-    dat_g_exp_pattern <- paste0('chromatin', '.',sapply(nchar(as.character(dat_g_exp$Time)),function(x){paste0(rep(0,3-x),collapse='')}), as.character(dat_g_exp$Time),'.',dat_g_exp$batch)
-    # dat_g_exp_pattern_2 <- sapply(1:nrow(dat_g_exp),function(i){paste0('chromatin.*', '.',paste0(rep(0,3-nchar(as.character(dat_g_exp$Time[i]))), collapse = ''), as.character(dat_g_exp$Time[i]),'.',dat_g_exp$batch[i])})
+    dat_g_exp_pattern <- paste0('chromatin', '.',sapply(nchar(as.character(dat_g_exp$Time)),function(x){paste0(rep(0,3-x),collapse='')}), as.character(dat_g_exp$Time),'.',dat_g_exp$replicate)
+    # dat_g_exp_pattern_2 <- sapply(1:nrow(dat_g_exp),function(i){paste0('chromatin.*', '.',paste0(rep(0,3-nchar(as.character(dat_g_exp$Time[i]))), collapse = ''), as.character(dat_g_exp$Time[i]),'.',dat_g_exp$replicate[i])})
     # lib_indices <- sapply(1:nrow(dat_g_exp),function(i){tmp <- grep(pattern = dat_g_exp_pattern[i], x = row.names(library_size), ignore.case = T); if (length(tmp)==0){return(NA)}else{return(tmp)}})
     lib_indices <- match(dat_g_exp_pattern, row.names(library_size))
     libsize <- as.integer(floor((library_size[,"lib.size"]*library_size[,"norm.factors"])[lib_indices]))
     
-    # libsize <- as.integer(floor((library_size$lib.size*library_size$norm.factors)[unlist(sapply(1:nrow(dat_g_exp),function(i){tmp <- grep(pattern = paste0('chromatin.*', '.',paste0(rep(0,3-nchar(as.character(dat_g_exp$Time[i]))), collapse = ''), as.character(dat_g_exp$Time[i]),'.',dat_g_exp$batch[i]), x = library_size$samples, ignore.case = T); if (length(tmp)==0){return(NA)}else{return(tmp)}}))]))
+    # libsize <- as.integer(floor((library_size$lib.size*library_size$norm.factors)[unlist(sapply(1:nrow(dat_g_exp),function(i){tmp <- grep(pattern = paste0('chromatin.*', '.',paste0(rep(0,3-nchar(as.character(dat_g_exp$Time[i]))), collapse = ''), as.character(dat_g_exp$Time[i]),'.',dat_g_exp$replicate[i]), x = library_size$samples, ignore.case = T); if (length(tmp)==0){return(NA)}else{return(tmp)}}))]))
     
     # Calculate prob of p using a beta distribution: k ~ binom(p,N), p ~ beta(k+1, N-k+1) in log f is t*f(t)
     proba <- sapply(1:nrow(dat_g_exp), function(i){ 2^dat_g_exp$RPKM[i] * length / 10^3 / 10^6 * dbeta( x = 2^dat_g_exp$RPKM[i] * length / 10^3 / 10^6, shape1 = 2^dat_g_exp$RPKM[i] * length/10^3 * libsize[i]/10^6 + 1, shape2 = libsize[i] - 2^dat_g_exp$RPKM[i] * length/10^3 * libsize[i]/10^6 + 1)})
@@ -604,19 +604,19 @@ TSE_bs_theo_bt <- function(par, fn_fit, data, time_data, batch, results="sum", l
     # prob_rpkm_lb <- log2(sapply(1:nrow(dat_g_exp), function(i){10^6*10^3/length * qbeta( p = 0.25, shape1 = 2^dat_g_exp$RPKM[i] * length/10^3 * libsize[i]/10^6 + 1, shape2 = libsize[i] - 2^dat_g_exp$RPKM[i] * length/10^3 * libsize[i]/10^6 + 1, lower.tail=T)}))
     
     res <- vector(mode = "list", length=ncol(data$caRNA)-1)
-    # for each batch
+    # for each replicate
     for (b in 2:(ncol(data$caRNA))){
-      # extrapolate caRNA for specific batch 
+      # extrapolate caRNA for specific replicate 
       data_extra <- data.frame(x=as.vector(data_extrapolation[,1]), y=as.vector(data_extrapolation[,b]))
       data_extra <- data_extra[!is.na(data_extra$y),]
       
       # calculate weight as 1/IQR(p) saturating at 10
       if(ncol(data$caRNA) > 2){
-        weight <- proba[dat_g_exp$batch == paste0('b',b-1)]
-        # weight <- sapply(1:length(prob_rpkm_ub),function(i){1/max(0.1,prob_rpkm_ub[i]-prob_rpkm_lb[i])})[dat_g_exp$batch == paste0('b',b-1)] # don't go to low values
+        weight <- proba[dat_g_exp$replicate == paste0('rep',b-1)]
+        # weight <- sapply(1:length(prob_rpkm_ub),function(i){1/max(0.1,prob_rpkm_ub[i]-prob_rpkm_lb[i])})[dat_g_exp$replicate == paste0('rep',b-1)] # don't go to low values
       }else{
-        weight <- proba[dat_g_exp$batch == batch]
-        # weight <- sapply(1:length(prob_rpkm_ub),function(i){1/max(0.1,prob_rpkm_ub[i]-prob_rpkm_lb[i])})[dat_g_exp$batch == batch] # don't go to low values
+        weight <- proba[dat_g_exp$replicate == replicate]
+        # weight <- sapply(1:length(prob_rpkm_ub),function(i){1/max(0.1,prob_rpkm_ub[i]-prob_rpkm_lb[i])})[dat_g_exp$replicate == replicate] # don't go to low values
       }
       weight <- weight/max(weight, na.rm=T)
       # add max weigth to the missing t=0 values replaced by parameter (i.e. sure values)
@@ -688,12 +688,12 @@ TSE_bs_theo_bt <- function(par, fn_fit, data, time_data, batch, results="sum", l
             cpt_name <- "cytoplasmic"
           }
           # print(cbind(fit[match(data[[cpt]][,"t"], time_data), cpt], data[[cpt]]))
-          dat_g_exp_pattern <- paste0(cpt_name, '.',sapply(nchar(as.character(dat_g_exp$Time)),function(x){paste0(rep(0,3-x),collapse='')}), as.character(dat_g_exp$Time),'.', dat_g_exp$batch)
+          dat_g_exp_pattern <- paste0(cpt_name, '.',sapply(nchar(as.character(dat_g_exp$Time)),function(x){paste0(rep(0,3-x),collapse='')}), as.character(dat_g_exp$Time),'.', dat_g_exp$replicate)
           # lib_indices <- sapply(1:nrow(dat_g_exp),function(i){tmp <- grep(pattern = dat_g_exp_pattern[i], x = row.names(library_size), ignore.case = T); if (length(tmp)==0){return(NA)}else{return(tmp)}})
           lib_indices <- match(dat_g_exp_pattern, row.names(library_size))
-          libsize <- as.integer(floor((library_size[,"lib.size"]*library_size[,"norm.factors"])[lib_indices]))[dat_g_exp$batch == paste0('b',b-1)]
+          libsize <- as.integer(floor((library_size[,"lib.size"]*library_size[,"norm.factors"])[lib_indices]))[dat_g_exp$replicate == paste0('rep',b-1)]
           
-          # libsize <- as.integer(floor((library_size$lib.size*library_size$norm.factors)[unlist(sapply(1:nrow(dat_g_exp),function(i){tmp <- grep(pattern = paste0(cpt_name,'.*', '.',paste0(rep(0,3-nchar(as.character(dat_g_exp$Time[i]))), collapse = ''),  as.character(dat_g_exp$Time[i]),'.',dat_g_exp$batch[i]), x = library_size$samples, ignore.case = T); if (length(tmp)==0){return(NA)}else{return(tmp)}}))]))[dat_g_exp$batch == paste0('b',b-1)]
+          # libsize <- as.integer(floor((library_size$lib.size*library_size$norm.factors)[unlist(sapply(1:nrow(dat_g_exp),function(i){tmp <- grep(pattern = paste0(cpt_name,'.*', '.',paste0(rep(0,3-nchar(as.character(dat_g_exp$Time[i]))), collapse = ''),  as.character(dat_g_exp$Time[i]),'.',dat_g_exp$replicate[i]), x = library_size$samples, ignore.case = T); if (length(tmp)==0){return(NA)}else{return(tmp)}}))]))[dat_g_exp$replicate == paste0('rep',b-1)]
           
           res[[b-1]] <- c(res[[b-1]], TSE_neg_binom_cp(fit[match(data[[cpt]][,"t"], time_data), cpt], fit_deriv[match(data[[cpt]][,"t"], time_data), cpt],  data[[cpt]][,b], libsize, length, sigmab, sigmat))
         }else{
@@ -711,14 +711,14 @@ TSE_bs_theo_bt <- function(par, fn_fit, data, time_data, batch, results="sum", l
       # v2
       res <- res - log(2*1/(5*sqrt(2*pi))) + sigmat^2/(2*5^2) - log(2/(0.1*sqrt(2*pi))) + sigmab^2/(2*0.1^2) - log(1/(sqrt(2*pi)*0.05)) + (span - 0.45)^2/(2*0.05^2)
       
-      # add regul on b1_ca0 based the other ca_0
+      # add regul on rep1_ca0 based the other ca_0
       if(any(is.na(data$caRNA[data$caRNA[,1]==0, is.na(data$caRNA[data$caRNA[,1]==0,])]))){
         ca_other_0 <- data_rpkm_all$caRNA[data_rpkm_all$caRNA[,1]==0,-1] 
         ca_other_10 <- data_rpkm_all$caRNA[data_rpkm_all$caRNA[,1]==10,-1] 
         
         delta <- mean(ca_other_0 - ca_other_10, na.rm=T)
         
-        # libsize <- mean(as.integer(floor((library_size$lib.size*library_size$norm.factors)[unlist(sapply(1:nrow(dat_g_exp),function(i){tmp <- grep(pattern = paste0('chromatin.*', '.',paste0(rep(0,3-nchar(as.character(dat_g_exp$Time[i]))), collapse = ''),  as.character(dat_g_exp$Time[i]),'.',dat_g_exp$batch[i]), x = library_size$samples, ignore.case = T); if (length(tmp)==0){return(NA)}else{return(tmp)}}))]))[dat_g_exp$Time == 0], na.rm=T)
+        # libsize <- mean(as.integer(floor((library_size$lib.size*library_size$norm.factors)[unlist(sapply(1:nrow(dat_g_exp),function(i){tmp <- grep(pattern = paste0('chromatin.*', '.',paste0(rep(0,3-nchar(as.character(dat_g_exp$Time[i]))), collapse = ''),  as.character(dat_g_exp$Time[i]),'.',dat_g_exp$replicate[i]), x = library_size$samples, ignore.case = T); if (length(tmp)==0){return(NA)}else{return(tmp)}}))]))[dat_g_exp$Time == 0], na.rm=T)
         
         # proba <- pbeta( q = 2^(delta + data$caRNA[data$caRNA[,1]==10, is.na(data$caRNA[data$caRNA[,1]==0,])])* length / 10^3 / 10^6, shape1 = 2^(delta + data$caRNA[data$caRNA[,1]==10, is.na(data$caRNA[data$caRNA[,1]==0,])]) * length/10^3 * libsize/10^6 + 1, shape2 = libsize - 2^(delta + data$caRNA[data$caRNA[,1]==10, is.na(data$caRNA[data$caRNA[,1]==0,])]) * length/10^3 * libsize/10^6 + 1)
         
@@ -741,7 +741,7 @@ TSE_bs_theo_bt <- function(par, fn_fit, data, time_data, batch, results="sum", l
     return(res)
   }, error=function(e){return(10^16)})
 }
-TSE_bs_theo_bt_cp <- cmpfun(TSE_bs_theo_bt)
+TSE_reps_theo_bt_cp <- cmpfun(TSE_reps_theo_bt)
 
 
 
@@ -798,7 +798,7 @@ TSE_poisson_cp <- cmpfun(TSE_poisson)
 
 
 
-TSE_bs_sa_fixed <- function(par, fixed, fixed_value, fixed_name, fn_fit, data_all, data_rpkm, time_data, batch, results="sum", ...){
+TSE_reps_sa_fixed <- function(par, fixed, fixed_value, fixed_name, fn_fit, data_all, data_rpkm, time_data, replicate, results="sum", ...){
   if (fixed_name != "k1'/k2" & fixed_name != "k1'k2'/k2"){
     par <- c(par[1:(3+sum(is.na(data_rpkm$caRNA[1,])) + fixed-1)], fixed_value, par[(3+sum(is.na(data_rpkm$caRNA[1,]))+fixed):length(par)])
   }else if (fixed_name == "k1'/k2" ){
@@ -807,25 +807,25 @@ TSE_bs_sa_fixed <- function(par, fixed, fixed_value, fixed_name, fn_fit, data_al
     par <- c(par[1:(3+sum(is.na(data_rpkm$caRNA[1,])))], fixed_value + par[3+sum(is.na(data_rpkm$caRNA[1,]))+1] - par[3+sum(is.na(data_rpkm$caRNA[1,]))+2] , par[(3+sum(is.na(data_rpkm$caRNA[1,]))+1):length(par)])
   }
   
-  if (batch != 'b2'){
+  if (replicate != 'rep3'){
     par_new <- c(par[1:(3+sum(is.na(data_rpkm$caRNA[1,])))],parameters_convert_cp(par[3+sum(is.na(data_rpkm$caRNA[1,]))+1:4],log_in = T, log_out = T, direction = 1, no_np = F))
-    res <- TSE_bs_cp(par = par_new, fn_fit = fn_fit, data = data_all, time_data = time_data, batch=batch, results = results, ...)
+    res <- TSE_reps_cp(par = par_new, fn_fit = fn_fit, data = data_all, time_data = time_data, replicate=replicate, results = results, ...)
     return(res)
   }else{
     par_new <- c(par[1:(3+sum(is.na(data_rpkm$caRNA[1,])))],parameters_convert_cp(par[3+sum(is.na(data_rpkm$caRNA[1,]))+1:3],log_in = T, log_out = T, direction = 1, no_np = T))
-    res <- TSE_bs_cp(par = par_new, fn_fit = fn_fit, data = data_all, time_data = time_data, batch=batch, results = results, ...)
+    res <- TSE_reps_cp(par = par_new, fn_fit = fn_fit, data = data_all, time_data = time_data, replicate=replicate, results = results, ...)
     return(res)
   }
 }
-TSE_bs_sa_fixed_cp <- cmpfun(TSE_bs_sa_fixed)
+TSE_reps_sa_fixed_cp <- cmpfun(TSE_reps_sa_fixed)
 
 
 ## optimisation wrappers
-optim_all_bs <- function(n_init, obj_fn, data_rpkm, batch, save_file, length, libsize, ...){
+optim_all_reps <- function(n_init, obj_fn, data_rpkm, replicate, save_file, length, libsize, ...){
    data_rpkm_all <- data_rpkm
     
-  if(batch != 'all'){
-    b <- as.numeric(gsub('b','',batch)) 
+  if(replicate != 'all'){
+    b <- as.numeric(gsub('rep','',replicate)) 
     data_rpkm <- lapply(data_rpkm_all, function(l){l[,c(1,1+b)]})
   }
     
@@ -840,7 +840,7 @@ optim_all_bs <- function(n_init, obj_fn, data_rpkm, batch, save_file, length, li
       list_object_new <- ls()
       
       if(list_object_new[!(list_object_new %in% list_object)] == "bfgs"){
-        best_all <- bfgs[[batch]]
+        best_all <- bfgs[[replicate]]
       }else if (list_object_new[!(list_object_new %in% list_object)] == "best_all") {
       }
       n_init <- length(best_all$value)
@@ -848,7 +848,7 @@ optim_all_bs <- function(n_init, obj_fn, data_rpkm, batch, save_file, length, li
   }
     
   if (new_table){
-    if(batch != 'b2'){
+    if(replicate != 'rep3'){
       best_all <- list(value=as.numeric(rep(NA, n_init)), 
                        start_value = as.numeric(rep(NA, n_init)), 
                        seed = as.integer(rep(NA, n_init)), 
@@ -875,7 +875,7 @@ optim_all_bs <- function(n_init, obj_fn, data_rpkm, batch, save_file, length, li
     seed <- floor(runif(1) * 10^8)
     set.seed(seed)
     
-    if( batch != 'b2'){
+    if( replicate != 'rep3'){
       p <- vector(length=7+sum(is.na(data_rpkm$caRNA[1,])))
     }else{
       p <- vector(length=6+sum(is.na(data_rpkm$caRNA[1,])))
@@ -885,7 +885,7 @@ optim_all_bs <- function(n_init, obj_fn, data_rpkm, batch, save_file, length, li
     p[2] <- abs(rnorm(1,0,5)) # sigmat
     p[3] <- abs(rnorm(1,0,0.1)) # sigmab
     
-    if(any(is.na(data_rpkm$caRNA[1,]))){i
+    if(any(is.na(data_rpkm$caRNA[1,]))){
       ca_other_0 <- data_rpkm_all$caRNA[data_rpkm_all$caRNA[,1]==0,-1]
       ca_other_10 <- data_rpkm_all$caRNA[data_rpkm_all$caRNA[,1]==10,-1]
 
@@ -893,20 +893,20 @@ optim_all_bs <- function(n_init, obj_fn, data_rpkm, batch, save_file, length, li
       p[3+1:sum(is.na(data_rpkm$caRNA[1,]))] <- sapply(which(is.na(data_rpkm$caRNA[1,])), function(idx){data_rpkm$caRNA[,idx][which(!is.na(data_rpkm$caRNA[,idx]))[1]]}) + delta + rnorm(mean = 0, sd = 0.5, n =sum(is.na(data_rpkm$caRNA[1,])))
     }
     
-    if( batch != 'b2'){
+    if( replicate != 'rep3'){
       p[3+sum(is.na(data_rpkm$caRNA[1,])) + 1:4]  <- runif(4, -5, 5)
     }else{
       p[3+sum(is.na(data_rpkm$caRNA[1,])) + 1:3]  <- runif(3, -5, 5)
     }
 
-    init_val <- obj_fn(par = p, fn_fit = fn_all_ode_cp, data = data_rpkm_all, convert_param = T, log_in = T, u=input_fun_cp, batch = batch, length = length, library_size=libsize, ... )
+    init_val <- obj_fn(par = p, fn_fit = fn_all_ode_cp, data = data_rpkm_all, convert_param = T, log_in = T, u=input_fun_cp, replicate = replicate, length = length, library_size=libsize, ... )
     
     if (!is.null(init_val) & init_val != 10^16){
       cpt_1 <- proc.time()
         
       fit_all_tot <- NULL
       tryCatch({
-        fit_all_tot <- optim(par = p, fn = obj_fn, fn_fit = fn_all_ode_cp,  data = data_rpkm_all, convert_param = T, log_in = T,  method = "BFGS", control = list(maxit=1000, trace=5, REPORT=10), u=input_fun_cp, batch = batch, length=length, library_size=libsize, ...)  # print(fit_np_tot$value)
+        fit_all_tot <- optim(par = p, fn = obj_fn, fn_fit = fn_all_ode_cp,  data = data_rpkm_all, convert_param = T, log_in = T,  method = "BFGS", control = list(maxit=1000, trace=5, REPORT=10), u=input_fun_cp, replicate = replicate, length=length, library_size=libsize, ...)  # print(fit_np_tot$value)
       }, error = function(e){print('Error for initial parameter:'); print(p); fit_all_tot <- NULL})
       
       cpt_2 <- proc.time()
@@ -929,23 +929,23 @@ optim_all_bs <- function(n_init, obj_fn, data_rpkm, batch, save_file, length, li
   }
   return(best_all)
 }
-optim_all_bs_cp <- cmpfun(optim_all_bs)
+optim_all_reps_cp <- cmpfun(optim_all_reps)
 
 # second optim
-second_optim_all_bs <- function(n_init, obj_fn, data_rpkm, batch, first_best, ...){
-  # if(batch == "b1"){
+second_optim_all_reps <- function(n_init, obj_fn, data_rpkm, replicate, first_best, ...){
+  # if(replicate == "rep1"){
   #   best_all <- list(value=vector(length=n_init), parameter = matrix(nrow = n_init, ncol=6), convergence=vector(length=n_init))
   # }else{
   best_all <- list(value=vector(length=n_init), parameter = matrix(nrow = n_init, ncol=5), convergence=vector(length=n_init))
   # }
   # pp <- signal:::pchip(x=data_rpkm_all$caRNA[,1], y = rowMeans(data_rpkm_all$caRNA[,-1], na.rm=T))
   
-  # optim span of loess such that sum of mse by batch is min
+  # optim span of loess such that sum of mse by replicate is min
   
   # span <- 0.65
   # span_optim <- optim(span, MSE_span, data=data_rpkm_all, method="Nelder-Mead")
   
-  # loess_caRNA <- loess(caRNA ~ Time,data = data.frame(Time=as.vector(matrix(rep(data_rpkm_all$caRNA[,1], 3),byrow = F)), caRNA=as.vector(data_rpkm_all$caRNA[,-1]), Batch=as.vector(matrix(c("b1", "b2", "b3"),ncol=col(data_rpkm_all$caRNA[,-1]),byrow = T))), span=1)
+  # loess_caRNA <- loess(caRNA ~ Time,data = data.frame(Time=as.vector(matrix(rep(data_rpkm_all$caRNA[,1], 3),byrow = F)), caRNA=as.vector(data_rpkm_all$caRNA[,-1]), replicate=as.vector(matrix(c("rep1", "rep3", "rep2"),ncol=col(data_rpkm_all$caRNA[,-1]),byrow = T))), span=1)
   # lines(predict(loess_caRNA, 0:120))
   
   # tmp<-sapply(seq(0.1,1,by=0.01), function(s){MSE_span(s, data_rpkm_all)})
@@ -954,16 +954,16 @@ second_optim_all_bs <- function(n_init, obj_fn, data_rpkm, batch, first_best, ..
   while (i < n_init ) { 
     i <- i + 1
     
-    previous <- first_best[[batch]]$parameter[order(first_best[[batch]]$value, decreasing = F), ][i,]
+    previous <- first_best[[replicate]]$parameter[order(first_best[[replicate]]$value, decreasing = F), ][i,]
     # print(previous)
-    best <- list(value=first_best[[batch]]$value[order(first_best[[batch]]$value, decreasing = F)][i], parameter = previous, convergence=first_best[[batch]]$convergence[order(first_best[[batch]]$value, decreasing = F)][i])
+    best <- list(value=first_best[[replicate]]$value[order(first_best[[replicate]]$value, decreasing = F)][i], parameter = previous, convergence=first_best[[replicate]]$convergence[order(first_best[[replicate]]$value, decreasing = F)][i])
     
     j <- 0
     
     while (j < 10 ) { 
       j <- j + 1
       
-      # if(batch == "b1"){
+      # if(replicate == "rep1"){
       #   p <- vector(length=6)
       #   p <- c(runif(1,0.2,1), runif(1,-5,5),runif(4, -3, 3))
       # } else {
@@ -972,7 +972,7 @@ second_optim_all_bs <- function(n_init, obj_fn, data_rpkm, batch, first_best, ..
       # }
       
       fit_all_tot <- tryCatch({
-        optim(par = p, fn = obj_fn, fn_fit = fn_all_ode,  data = data_rpkm, convert_param = T, log_in = T,  method = "BFGS", control = list(maxit=1000, trace=5, REPORT=1000), u=interpolate_caRNA, batch = batch, ...)  # print(fit_np_tot$value)
+        optim(par = p, fn = obj_fn, fn_fit = fn_all_ode,  data = data_rpkm, convert_param = T, log_in = T,  method = "BFGS", control = list(maxit=1000, trace=5, REPORT=1000), u=interpolate_caRNA, replicate = replicate, ...)  # print(fit_np_tot$value)
       }, error = function(e){e; print('Error for initial parameter:'); print(p); print(e); return(NULL)})
       
       if(is.null(fit_all_tot) | fit_all_tot$value == 10^16){
@@ -986,7 +986,7 @@ second_optim_all_bs <- function(n_init, obj_fn, data_rpkm, batch, first_best, ..
     }
     
     # fit_all_tot <- tryCatch({
-    #   optim(par = previous, fn = obj_fn, fn_fit = fn_all_ode,  data = data_rpkm, convert_param = T, log_in = T,  method = "BFGS", control = list(maxit=1000, trace=5, REPORT=1000), u=interpolate_caRNA, batch = batch, ...)  # print(fit_np_tot$value)
+    #   optim(par = previous, fn = obj_fn, fn_fit = fn_all_ode,  data = data_rpkm, convert_param = T, log_in = T,  method = "BFGS", control = list(maxit=1000, trace=5, REPORT=1000), u=interpolate_caRNA, replicate = replicate, ...)  # print(fit_np_tot$value)
     # }, error = function(e){e; print('Error for initial parameter:'); print(p); print(e); return(NULL)})
     
     best_all$value[i] <- best$value
@@ -997,11 +997,11 @@ second_optim_all_bs <- function(n_init, obj_fn, data_rpkm, batch, first_best, ..
 }
 
 ## extract gene data
-create_dat_g_rpkm <- function(rpkm, gene, batch = sort(unique(unlist(lapply(strsplit(colnames(rpkm), ".", fixed = T), function(x){x[4]})))), time = sort(unique(unlist(lapply(strsplit(colnames(rpkm), ".", fixed = T), function(x){x[3]}))))){
+create_dat_g_rpkm <- function(rpkm, gene, replicate = sort(unique(unlist(lapply(strsplit(colnames(rpkm), ".", fixed = T), function(x){x[4]})))), time = sort(unique(unlist(lapply(strsplit(colnames(rpkm), ".", fixed = T), function(x){x[3]}))))){
   dat_g_rpkm <- data.frame()
   for (t in time) {
     tmp <- c()     
-    for (b in batch) {
+    for (b in replicate) {
       if (length(grep(t, grep(b, colnames(rpkm), value = T))) == 0) {
         tmp <- c(tmp, NA)
       }else{
@@ -1010,7 +1010,7 @@ create_dat_g_rpkm <- function(rpkm, gene, batch = sort(unique(unlist(lapply(strs
     }
     dat_g_rpkm <- rbind(dat_g_rpkm, data.frame(t = as.numeric(t), t(tmp)))
   }
-  names(dat_g_rpkm) <- c('t', batch)
+  names(dat_g_rpkm) <- c('t', replicate)
   return(dat_g_rpkm)
 }
 create_dat_g_rpkm_cp <- cmpfun(create_dat_g_rpkm)
