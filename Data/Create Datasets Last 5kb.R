@@ -218,3 +218,17 @@ save(caRNA_LPA_exons_cpm_5kb, file='exons_cpms/caRNA_LPA_exons_cpm_5kb.Rdata')
 save(npRNA_LPA_exons_cpm_5kb, file='exons_cpms/npRNA_LPA_exons_cpm_5kb.Rdata')
 save(cytoRNA_LPA_exons_cpm_5kb, file='exons_cpms/cytoRNA_LPA_exons_cpm_5kb.Rdata')
 
+## Create gene_infos_with_length
+library(biomaRt)
+ensembl <- useMart(biomart = 'ensembl', dataset = 'mmusculus_gene_ensembl', host = 'may2017.archive.ensembl.org')
+
+gene_infos <- getBM(attributes = c("external_gene_name", "ensembl_gene_id",'version'),
+                 filters = "ensembl_gene_id",
+                 values = unlist(lapply(strsplit(x = caRNA_Naive_exons_5kb_all$Geneid, split = ".", fixed = T),
+                                        function(x){x[1]})),
+                 mart = ensembl )
+
+gene_infos$Length_5kb_naive = caRNA_Naive_exons_5kb_all$Length[match(gene_infos$ensembl_gene_id, sapply(caRNA_Naive_exons_5kb_all$Geneid, function(x){substr(x, 1, 18)}))]
+gene_infos$Length_5kb_lpa = caRNA_LPA_exons_5kb_all$Length[match(gene_infos$ensembl_gene_id, sapply(caRNA_LPA_exons_5kb_all$Geneid, function(x){substr(x, 1, 18)}))]
+
+save(gene_infos, file='gene_infos_with_length.Rdata')
