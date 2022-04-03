@@ -39,10 +39,8 @@ This step aimed at at removing potential bias due to partially trasncribed chrom
 * Identify expressed cytoplasmic transcripts with cufflinks see `Isoforms > cufflinks.sh` for exact options. Cufflinks results are given in the various sub folders under `Isoforms`. All these individual results were aggregated for all samples and filtered to keep only genes in the list of inducible LPA genes, defined in previous step. 
 * Manually curate TSS, TES (compared to gencode annotations) and expressed transcripts (compared to cufflinks output) see `Manual Curation`
 * To compare manually curated TSS and TES to external database see `Comparison with TSS-TES DB > TSS_polyA_distance_for_table.R` folder, the relevant information was extracted from the manual curation as `Comparison with TSS-TES DB > Gene_for_polyA_TSS_distance.txt`. While bed files from the `Comparison with TSS-TES DB > polyAsite_atlas.cluster.mm10.2-0.bed.gz` was dowloaded from PolyASite[https://polyasite.unibas.ch/atlas#3] and `Comparison with TSS-TES DB > refTSS_v3-1_mouse_coordinate.mm10.bed.gz` was download from RefTSS[http://reftss.clst.riken.jp/reftss/Main_Page]. The r script must be run from within its parent folder.
-* Then extract gtf corresponding to the last 5kb to get counts see `Last_5kb` folder. The relevant information was extracted from the manual curation as `Last_5kb > gene_list_final_naive.txt` and  `Last_5kb > gene_list_final_lpa.txt`. The annotations (gencode.vM14.gtf[https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_mouse/release_M14/gencode.vM14.annotation.gtf.gz]) were filtered to include only the last 5kp of the relevant genes based on those list and these new subsetted annotation were used to get counts of sequencing reads falling with those regions, see `Last_5kb > run_gtf5kb.sh` and `Last_5kb > get_5kb_gtf_with_dedup.py`. The resulting count files are given in `Data > merged_counts`. 
-* generated rpkm/cpm
-
-
+* Then extract gtf corresponding to the last 5kb to get counts see `Last_5kb` folder. The relevant information was extracted from the manual curation as `Last_5kb > gene_list_final_naive.txt` and  `Last_5kb > gene_list_final_lpa.txt`. The annotations (gencode.vM14.gtf[https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_mouse/release_M14/gencode.vM14.annotation.gtf.gz]) were filtered to include only the last 5kp of the relevant genes based on those list and these new subsetted annotation were used to get counts of sequencing reads falling with those regions using featureCounts, see `Last_5kb > run_gtf5kb.sh` and `Last_5kb > get_5kb_gtf_with_dedup.py`. The resulting count files are given in `Data > merged_counts`. 
+* R datasets based on those last 5kb read were generated using the script 'Data > Create Datasets Last 5kb.R` which must be run from within the `Data` folder.
 
 ### Requiremetnts for Step3
 Needed external softwares:
@@ -50,15 +48,13 @@ Needed external softwares:
 * Python 3.7 (glob, gzip, re, argparse)
 * IGV (for manual curation of TSS and TES)
 * featuresCounts
-* R (ggplot2, gridExtra, grid, scales)
+* R (ggplot2, gridExtra, grid, scales, edgeR)
 
+## Step 4: Model fitting
 
 
 
 -- To continue
-
-
-create dataset 5kb
 
 Figure: PCA DEGs on merged counts
 
