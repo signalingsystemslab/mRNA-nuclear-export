@@ -13,7 +13,7 @@ N_THREADS=24
 # take input from following directory
 IN_DIR="merged_bams_mm10_vM14"
 # write output files to following directory
-OUT_DIR="merged_counts_final"
+OUT_DIR="merged_counts"
 mkdir -p $OUT_DIR
 
 # Genome annotation
@@ -28,7 +28,6 @@ do
     
     wait
 done
-
 
 ## LPA
 # Manual Check tracks and create text file of gene to export gene_list_pre_final_naive.txt
@@ -46,3 +45,4 @@ do
     
     wait
 done
+
