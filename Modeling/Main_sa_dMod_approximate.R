@@ -7,12 +7,12 @@ print(args)
 
 i <- as.numeric(args[1])
 condition <- as.character(args[2])
-batch <- as.character(args[3])
+replicate <- as.character(args[3])
 folder <- as.character(args[4])
 
 print(paste0('i: ', i))
 print(paste0('condition: ', condition))
-print(paste0('batch: ', batch))
+print(paste0('replicate: ', replicate))
 print(paste0('folder: ', folder))
 
 ## Load Packages
@@ -27,24 +27,24 @@ library(compiler)
 library(deSolve)
 library(dMod)
 library(numDeriv)
-source('functions_weighting_for_smoothing_include_negbinom_error_in_model_v13.R')
+source('functions_weighting_for_smoothing_include_negbinom_error_in_model.R')
 source('profile_dMod_with_save.R')
 
 # pre-compile hessian and grad function
 grad_cp <- cmpfun(grad)
 hessian_cp <- cmpfun(hessian)
 
-TSE_bs_oldpar <- function(x,...){
+TSE_reps_oldpar <- function(x,...){
   par_names <- names(x)
   pars_new <- c(x[ !(par_names %in% c("k1'","k1'k2'", "k2", "k2'", "kdeg")) ], parameters_convert_cp(x[(par_names %in% c("k1'","k1'k2'", "k2", "k2'", "kdeg"))], log_in = T, log_out = T, direction = 1, no_np = no_np))
   names(pars_new) <- c(par_names[!(par_names %in% c("k1'","k1'k2'", "k2", "k2'", "kdeg"))], par_names[(par_names %in% c("k1'","k1'k2'", "k2", "k2'", "kdeg"))])
   x_new <- pars_new[par_names]
-  res <- TSE_bs_cp(par = x_new,...)
+  res <- TSE_reps_cp(par = x_new,...)
   return(res)
 }
   
-TSE_bs_cp_grad <- function(x, ...){grad_cp(TSE_bs_oldpar, x, ...)}
-TSE_bs_cp_hessian <- function(x, ...){ hessian_cp(TSE_bs_oldpar, x, ...) }
+TSE_reps_cp_grad <- function(x, ...){grad_cp(TSE_reps_oldpar, x, ...)}
+TSE_reps_cp_hessian <- function(x, ...){ hessian_cp(TSE_reps_oldpar, x, ...) }
 
 ################
 ## Load Rdata ##
@@ -52,17 +52,20 @@ TSE_bs_cp_hessian <- function(x, ...){ hessian_cp(TSE_bs_oldpar, x, ...) }
 print('Creating needed folders')
 
 scratch_dir <- Sys.getenv("SCRATCH")
+if(scratch_dir == ""){
+  scratch_dir <- "."
+}
 print(scratch_dir)
 out_dir <- paste0(scratch_dir,'/',folder)
 dir.create(file.path(out_dir), showWarnings = FALSE)
-out_dir <- paste0(out_dir, '/Profile_dMod')
+out_dir <- paste0(out_dir, '/Profile_dMod_integrate')
 dir.create(file.path(out_dir), showWarnings = FALSE)
 out_dir <- paste0(out_dir,'/', condition)
 dir.create(file.path(out_dir), showWarnings = FALSE)
 out_dir <- paste0(out_dir,'/Run_log')
 dir.create(file.path(out_dir), showWarnings = FALSE)
 
-out_dir_path <- paste0(scratch_dir,'/',folder,'/Profile_dMod/', condition)
+out_dir_path <- paste0(scratch_dir,'/',folder,'/Profile_dMod_integrate/', condition)
 
 ####################################
 ## Get data for all compartments ##
@@ -71,40 +74,40 @@ print('Loading data')
 
 ## Exons last 5kb ----
 if (condition == 'naive'){
-  load('caRNA_Naive_exons_rpkm_5kb.Rdata')
-  load('npRNA_Naive_exons_rpkm_5kb.Rdata')
-  load('cytoRNA_Naive_exons_rpkm_5kb.Rdata')
+  load('../Data/exons_rpkms/caRNA_Naive_exons_rpkm_5kb.Rdata')
+  load('../Data/exons_rpkms/npRNA_Naive_exons_rpkm_5kb.Rdata')
+  load('../Data/exons_rpkms/cytoRNA_Naive_exons_rpkm_5kb.Rdata')
   g <- rownames(caRNA_Naive_exons_rpkm_5kb)[i]
 }else if (condition == 'lpa'){
-  load('caRNA_LPA_exons_rpkm_5kb.Rdata')
-  load('npRNA_LPA_exons_rpkm_5kb.Rdata')
-  load('cytoRNA_LPA_exons_rpkm_5kb.Rdata')
+  load('../Data/exons_rpkms/caRNA_LPA_exons_rpkm_5kb.Rdata')
+  load('../Data/exons_rpkms/npRNA_LPA_exons_rpkm_5kb.Rdata')
+  load('../Data/exons_rpkms/cytoRNA_LPA_exons_rpkm_5kb.Rdata')
   g <- rownames(caRNA_LPA_exons_rpkm_5kb)[i]
 }
 
-load('gene_infos_with_length.Rdata')
+load('../Data/gene_infos_with_length.Rdata')
 gene_name <- gene_infos$external_gene_name[gene_infos$ensembl_gene_id == substr(g,1,18)]
 
-load('lib.size.Rdata')
+load('../Data/raw_counts/lib.size.Rdata')
 lib <- lib_exons[,c("lib.size", "norm.factors")]
 row.names(lib) <- lib_exons$samples
 
 # lib$Time <- sapply(row.names(lib),function(x){strsplit(x,'.', fixed=T)[[1]][3]})
 # lib$Cpt <- sapply(row.names(lib),function(x){strsplit(x,'.', fixed=T)[[1]][1]})
-# lib$Batch <- sapply(row.names(lib),function(x){strsplit(x,'.', fixed=T)[[1]][4]})
+# lib$replicate <- sapply(row.names(lib),function(x){strsplit(x,'.', fixed=T)[[1]][4]})
 
 print(g)
 print(gene_name)
 
 if (condition == "naive"){
-  data_rpkm_all <- list( caRNA   = as.matrix(create_dat_g_rpkm_cp(caRNA_Naive_exons_rpkm_5kb,   g, batch=c("b1", "b2", "b3"), time = c("000","010","015","020","025","030","035","040","050","060","075","090","120"))), 
-                         npRNA   = as.matrix(create_dat_g_rpkm_cp(npRNA_Naive_exons_rpkm_5kb,   g, batch=c("b1", "b2", "b3"), time = c("000","010","015","020","025","030","035","040","050","060","075","090","120"))), 
-                         cytoRNA = as.matrix(create_dat_g_rpkm_cp(cytoRNA_Naive_exons_rpkm_5kb, g, batch=c("b1", "b2", "b3"), time = c("000","010","015","020","025","030","035","040","050","060","075","090","120"))))
+  data_rpkm_all <- list( caRNA   = as.matrix(create_dat_g_rpkm_cp(caRNA_Naive_exons_rpkm_5kb,   g, replicate=c("rep1", "rep2", "rep3"), time = c("000","010","015","020","025","030","035","040","050","060","075","090","120"))), 
+                         npRNA   = as.matrix(create_dat_g_rpkm_cp(npRNA_Naive_exons_rpkm_5kb,   g, replicate=c("rep1", "rep2", "rep3"), time = c("000","010","015","020","025","030","035","040","050","060","075","090","120"))), 
+                         cytoRNA = as.matrix(create_dat_g_rpkm_cp(cytoRNA_Naive_exons_rpkm_5kb, g, replicate=c("rep1", "rep2", "rep3"), time = c("000","010","015","020","025","030","035","040","050","060","075","090","120"))))
   length <- gene_infos$Length_5kb_naive[gene_infos$ensembl_gene_id == substr(g,1,18)]
 }else{
-  data_rpkm_all <- list( caRNA   = as.matrix(create_dat_g_rpkm_cp(caRNA_LPA_exons_rpkm_5kb,   g, batch=c("b1", "b2", "b3"), time = c("000","010","015","020","025","030","035","040","050","060","075","090","120"))), 
-                         npRNA   = as.matrix(create_dat_g_rpkm_cp(npRNA_LPA_exons_rpkm_5kb,   g, batch=c("b1", "b2", "b3"), time = c("000","010","015","020","025","030","035","040","050","060","075","090","120"))), 
-                         cytoRNA = as.matrix(create_dat_g_rpkm_cp(cytoRNA_LPA_exons_rpkm_5kb, g, batch=c("b1", "b2", "b3"), time = c("000","010","015","020","025","030","035","040","050","060","075","090","120"))))
+  data_rpkm_all <- list( caRNA   = as.matrix(create_dat_g_rpkm_cp(caRNA_LPA_exons_rpkm_5kb,   g, replicate=c("rep1", "rep2", "rep3"), time = c("000","010","015","020","025","030","035","040","050","060","075","090","120"))), 
+                         npRNA   = as.matrix(create_dat_g_rpkm_cp(npRNA_LPA_exons_rpkm_5kb,   g, replicate=c("rep1", "rep2", "rep3"), time = c("000","010","015","020","025","030","035","040","050","060","075","090","120"))), 
+                         cytoRNA = as.matrix(create_dat_g_rpkm_cp(cytoRNA_LPA_exons_rpkm_5kb, g, replicate=c("rep1", "rep2", "rep3"), time = c("000","010","015","020","025","030","035","040","050","060","075","090","120"))))
   length <- gene_infos$Length_5kb_lpa[gene_infos$ensembl_gene_id == substr(g,1,18)]
 }
 
@@ -116,49 +119,49 @@ print('Starting the Profile Analysis')
 # if not finished continue
 if (!file.exists(paste0(out_dir_path,'/sa_bfgs_merged', gene_name, '_Finished.Rdata',sep=""))){
   # load_best
-  load(paste0(scratch_dir, '/',folder, '/Optimisation/BFGS/',condition, '/param_bfgs_1000ri_',batch, '_', gene_name, '_Finished.Rdata'))
+  load(paste0(scratch_dir, '/',folder, '/Optimisation/BFGS/',condition, '/param_bfgs_1000ri_',replicate, '_', gene_name, '_Finished.Rdata'))
   
-  # for (batch in c('b1', 'b3', 'all', 'b2')){
-    if (!file.exists(paste0(out_dir_path,'/profile_dMod_', batch, '_', gene_name, '_Finished.Rdata',sep=""))){
-      sink(file = paste0(out_dir_path, '/Run_log/', gene_name, '_', batch, '.txt'), append = TRUE, split = FALSE)
+  # for (replicate in c('rep1', 'b3', 'all', 'rep3')){
+    if (!file.exists(paste0(out_dir_path,'/profile_dMod_', replicate, '_', gene_name, '_Finished.Rdata',sep=""))){
+      sink(file = paste0(out_dir_path, '/Run_log/', gene_name, '_', replicate, '.txt'), append = TRUE, split = FALSE)
            
-      if(batch == "all"){
-        b <- c("b1", "b2","b3")
+      if(replicate == "all"){
+        b <- c("rep1", "rep2","rep3")
       }else{
-        b <- batch
+        b <- replicate
       }
       
       if (condition == "naive") {
-        data <- list( caRNA   = as.matrix(create_dat_g_rpkm(caRNA_Naive_exons_rpkm_5kb,   g, batch=b, time = c("000","010","015","020","025","030","035","040","050","060","075","090","120"))), 
-                      npRNA   = as.matrix(create_dat_g_rpkm(npRNA_Naive_exons_rpkm_5kb,   g, batch=b, time = c("000","010","015","020","025","030","035","040","050","060","075","090","120"))), 
-                      cytoRNA = as.matrix(create_dat_g_rpkm(cytoRNA_Naive_exons_rpkm_5kb, g, batch=b, time = c("000","010","015","020","025","030","035","040","050","060","075","090","120"))))
-        data_all <- list( caRNA   = as.matrix(create_dat_g_rpkm(caRNA_Naive_exons_rpkm_5kb,   g, batch=c("b1", "b2","b3"), time = c("000","010","015","020","025","030","035","040","050","060","075","090","120"))), 
-                      npRNA   = as.matrix(create_dat_g_rpkm(npRNA_Naive_exons_rpkm_5kb,   g, batch=c("b1", "b2","b3"), time = c("000","010","015","020","025","030","035","040","050","060","075","090","120"))), 
-                      cytoRNA = as.matrix(create_dat_g_rpkm(cytoRNA_Naive_exons_rpkm_5kb, g, batch=c("b1", "b2","b3"), time = c("000","010","015","020","025","030","035","040","050","060","075","090","120"))))
+        data <- list( caRNA   = as.matrix(create_dat_g_rpkm(caRNA_Naive_exons_rpkm_5kb,   g, replicate=b, time = c("000","010","015","020","025","030","035","040","050","060","075","090","120"))), 
+                      npRNA   = as.matrix(create_dat_g_rpkm(npRNA_Naive_exons_rpkm_5kb,   g, replicate=b, time = c("000","010","015","020","025","030","035","040","050","060","075","090","120"))), 
+                      cytoRNA = as.matrix(create_dat_g_rpkm(cytoRNA_Naive_exons_rpkm_5kb, g, replicate=b, time = c("000","010","015","020","025","030","035","040","050","060","075","090","120"))))
+        data_all <- list( caRNA   = as.matrix(create_dat_g_rpkm(caRNA_Naive_exons_rpkm_5kb,   g, replicate=c("rep1", "rep2","rep3"), time = c("000","010","015","020","025","030","035","040","050","060","075","090","120"))), 
+                      npRNA   = as.matrix(create_dat_g_rpkm(npRNA_Naive_exons_rpkm_5kb,   g, replicate=c("rep1", "rep2","rep3"), time = c("000","010","015","020","025","030","035","040","050","060","075","090","120"))), 
+                      cytoRNA = as.matrix(create_dat_g_rpkm(cytoRNA_Naive_exons_rpkm_5kb, g, replicate=c("rep1", "rep2","rep3"), time = c("000","010","015","020","025","030","035","040","050","060","075","090","120"))))
       }else if (condition == "lpa"){
-        data <- list( caRNA   = as.matrix(create_dat_g_rpkm(caRNA_LPA_exons_rpkm_5kb,   g, batch=b, time = c("000","010","015","020","025","030","035","040","050","060","075","090","120"))), 
-                      npRNA   = as.matrix(create_dat_g_rpkm(npRNA_LPA_exons_rpkm_5kb,   g, batch=b, time = c("000","010","015","020","025","030","035","040","050","060","075","090","120"))), 
-                      cytoRNA = as.matrix(create_dat_g_rpkm(cytoRNA_LPA_exons_rpkm_5kb, g, batch=b, time = c("000","010","015","020","025","030","035","040","050","060","075","090","120"))))
-        data_all <- list( caRNA   = as.matrix(create_dat_g_rpkm(caRNA_LPA_exons_rpkm_5kb,   g, batch=c("b1", "b2","b3"), time = c("000","010","015","020","025","030","035","040","050","060","075","090","120"))), 
-                      npRNA   = as.matrix(create_dat_g_rpkm(npRNA_LPA_exons_rpkm_5kb,   g, batch=c("b1", "b2","b3"), time = c("000","010","015","020","025","030","035","040","050","060","075","090","120"))), 
-                      cytoRNA = as.matrix(create_dat_g_rpkm(cytoRNA_LPA_exons_rpkm_5kb, g, batch=c("b1", "b2","b3"), time = c("000","010","015","020","025","030","035","040","050","060","075","090","120"))))
+        data <- list( caRNA   = as.matrix(create_dat_g_rpkm(caRNA_LPA_exons_rpkm_5kb,   g, replicate=b, time = c("000","010","015","020","025","030","035","040","050","060","075","090","120"))), 
+                      npRNA   = as.matrix(create_dat_g_rpkm(npRNA_LPA_exons_rpkm_5kb,   g, replicate=b, time = c("000","010","015","020","025","030","035","040","050","060","075","090","120"))), 
+                      cytoRNA = as.matrix(create_dat_g_rpkm(cytoRNA_LPA_exons_rpkm_5kb, g, replicate=b, time = c("000","010","015","020","025","030","035","040","050","060","075","090","120"))))
+        data_all <- list( caRNA   = as.matrix(create_dat_g_rpkm(caRNA_LPA_exons_rpkm_5kb,   g, replicate=c("rep1", "rep2","rep3"), time = c("000","010","015","020","025","030","035","040","050","060","075","090","120"))), 
+                      npRNA   = as.matrix(create_dat_g_rpkm(npRNA_LPA_exons_rpkm_5kb,   g, replicate=c("rep1", "rep2","rep3"), time = c("000","010","015","020","025","030","035","040","050","060","075","090","120"))), 
+                      cytoRNA = as.matrix(create_dat_g_rpkm(cytoRNA_LPA_exons_rpkm_5kb, g, replicate=c("rep1", "rep2","rep3"), time = c("000","010","015","020","025","030","035","040","050","060","075","090","120"))))
       }
       
       lib_mat <- as.matrix(lib[grep(condition, row.names(lib), ignore.case = T),])
       row.names(lib_mat) <- gsub(pattern = condition, replacement = '', x = row.names(lib_mat), ignore.case = T)
       row.names(lib_mat) <- gsub(pattern = '..', replacement = '.', x = row.names(lib_mat), fixed = T)
       
-      tmp_file <- paste0(out_dir_path,'/sa_bfgs_', batch, '_', gene_name, '.Rdata',sep="")
-      bfgs <- bfgs[[batch]]
+      tmp_file <- paste0(out_dir_path,'/sa_bfgs_', replicate, '_', gene_name, '.Rdata',sep="")
+      bfgs <- bfgs[[replicate]]
       par_best <- bfgs$parameter[which.min( bfgs$value),]
     
-      if(batch == 'b2'){
+      if(replicate == 'rep3'){
         no_np <- TRUE
       }else{
         no_np <- FALSE
       }
       
-      if( batch %in% c('b1','all') & condition == "naive"){
+      if( replicate %in% c('rep1','all') & condition == "naive"){
         no_ca0 <- TRUE
       }else{ 
         no_ca0 <- FALSE 
@@ -166,13 +169,13 @@ if (!file.exists(paste0(out_dir_path,'/sa_bfgs_merged', gene_name, '_Finished.Rd
       
       # convert add names and combine param to the best
       if ( no_np ){
-        par_names_best <- c("span", "sigma_t", "sigma_b", "b1_ca0", "k1'k2'", "k2", "kdeg")
+        par_names_best <- c("span", "sigma_t", "sigma_b", "rep1_ca0", "k1'k2'", "k2", "kdeg")
       }else{
-        par_names_best <- c("span", "sigma_t", "sigma_b", "b1_ca0", "k1'", "k2", "k2'", "kdeg")
+        par_names_best <- c("span", "sigma_t", "sigma_b", "rep1_ca0", "k1'", "k2", "k2'", "kdeg")
       }
       
       if( !no_ca0 ){
-        par_names_best <- par_names_best[par_names_best != "b1_ca0"]
+        par_names_best <- par_names_best[par_names_best != "rep1_ca0"]
       }
       
       par_best_old <- c(par_best[!(par_names_best %in% c("k1'","k1'k2'", "k2", "k2'", "kdeg")) ], parameters_convert_cp(par_best[(par_names_best %in% c("k1'","k1'k2'", "k2", "k2'", "kdeg")) ], log_in = T, log_out = T, direction = -1, no_np = no_np))
@@ -193,13 +196,13 @@ if (!file.exists(paste0(out_dir_path,'/sa_bfgs_merged', gene_name, '_Finished.Rd
       # For dMod
       # obj_vgh <- function(pars, fixed = NULL, scale=2, no_np = F, no_ca0 = F ){
       #   if ( no_np ){
-      #     par_names <- c("span", "sigma_t", "sigma_b", "b1_ca0", "k1'k2'", "k2", "kdeg", "k1'k2'/k2",)
+      #     par_names <- c("span", "sigma_t", "sigma_b", "rep1_ca0", "k1'k2'", "k2", "kdeg", "k1'k2'/k2",)
       #   }else{
-      #     par_names <- c("span", "sigma_t", "sigma_b", "b1_ca0", "k1'", "k2", "k2'", "kdeg", "k1'/k2","k1'k2'/k2")
+      #     par_names <- c("span", "sigma_t", "sigma_b", "rep1_ca0", "k1'", "k2", "k2'", "kdeg", "k1'/k2","k1'k2'/k2")
       #   }
       #   
       #   if ( !no_ca0 ){
-      #     par_names <- par_names[-which(par_names == "b1_ca0")]
+      #     par_names <- par_names[-which(par_names == "rep1_ca0")]
       #   }
       #   
       #   if ( !is.null(fixed) ){
@@ -244,8 +247,8 @@ if (!file.exists(paste0(out_dir_path,'/sa_bfgs_merged', gene_name, '_Finished.Rd
       #   names(pars_new) <- c(par_names[!(par_names %in% c("k1'","k1'k2'", "k2", "k2'", "kdeg"))], par_names[(par_names %in% c("k1'","k1'k2'", "k2", "k2'", "kdeg"))])
       #   pars_new_ordered <- pars_new[par_names]
       #   
-      #   val <- unname(TSE_bs_cp(par = pars_new_ordered[-which(par_names %in% c("k1'/k2", "k1'k2'/k2"))], fn_fit=fn_all_ode_cp, data = data_rpkm_all, time_data=time_data, convert_param=T, log_in=T, u=input_fun_cp, batch=batch, results = "sum", library_size = lib_mat, length = length))
-      #   gradient_val <- TSE_bs_cp_grad(x = pars_new_ordered[-which(par_names %in% c("k1'/k2", "k1'k2'/k2"))], fn_fit=fn_all_ode_cp, data = data_rpkm_all, time_data=time_data, convert_param=T, log_in=T, u=input_fun_cp, batch=batch, results = "sum", library_size = lib_mat, length = length)
+      #   val <- unname(TSE_reps_cp(par = pars_new_ordered[-which(par_names %in% c("k1'/k2", "k1'k2'/k2"))], fn_fit=fn_all_ode_cp, data = data_rpkm_all, time_data=time_data, convert_param=T, log_in=T, u=input_fun_cp, replicate=replicate, results = "sum", library_size = lib_mat, length = length))
+      #   gradient_val <- TSE_reps_cp_grad(x = pars_new_ordered[-which(par_names %in% c("k1'/k2", "k1'k2'/k2"))], fn_fit=fn_all_ode_cp, data = data_rpkm_all, time_data=time_data, convert_param=T, log_in=T, u=input_fun_cp, replicate=replicate, results = "sum", library_size = lib_mat, length = length)
       #   # add gradient for additional parnames
       #   for (parname_add in par_names[which(par_names %in% c("k1'/k2", "k1'k2'/k2"))]){
       #     if (parname_add == "k1'/k2"){
@@ -259,7 +262,7 @@ if (!file.exists(paste0(out_dir_path,'/sa_bfgs_merged', gene_name, '_Finished.Rd
       #     }
       #   }
       #   
-      #   hessian_val <- TSE_bs_cp_hessian(x = pars_new_ordered[-which(par_names %in% c("k1'/k2", "k1'k2'/k2"))],fn_fit=fn_all_ode_cp, data = data_rpkm_all, time_data=time_data, convert_param=T, log_in=T, u=input_fun_cp, batch=batch, results = "sum", library_size = lib_mat, length = length)
+      #   hessian_val <- TSE_reps_cp_hessian(x = pars_new_ordered[-which(par_names %in% c("k1'/k2", "k1'k2'/k2"))],fn_fit=fn_all_ode_cp, data = data_rpkm_all, time_data=time_data, convert_param=T, log_in=T, u=input_fun_cp, replicate=replicate, results = "sum", library_size = lib_mat, length = length)
       #   # add hessian for additional parnames
       #   for (parname_add in par_names[which(par_names %in% c("k1'/k2", "k1'k2'/k2"))]){
       #     if (parname_add == "k1'/k2"){
@@ -312,13 +315,13 @@ if (!file.exists(paste0(out_dir_path,'/sa_bfgs_merged', gene_name, '_Finished.Rd
       
       obj_vgh_main <- function(pars, fixed = NULL, scale=2, no_np = F, no_ca0 = F ){
         if ( no_np ){
-          par_names <- c("span", "sigma_t", "sigma_b", "b1_ca0", "k1'k2'", "k2", "kdeg")
+          par_names <- c("span", "sigma_t", "sigma_b", "rep1_ca0", "k1'k2'", "k2", "kdeg")
         }else{
-          par_names <- c("span", "sigma_t", "sigma_b", "b1_ca0", "k1'", "k2", "k2'", "kdeg")
+          par_names <- c("span", "sigma_t", "sigma_b", "rep1_ca0", "k1'", "k2", "k2'", "kdeg")
         }
         
         if ( !no_ca0 ){
-          par_names <- par_names[-which(par_names == "b1_ca0")]
+          par_names <- par_names[-which(par_names == "rep1_ca0")]
         }
         
         if ( !is.null(fixed) ){
@@ -329,9 +332,14 @@ if (!file.exists(paste0(out_dir_path,'/sa_bfgs_merged', gene_name, '_Finished.Rd
         # reorder
         pars_ordered <- pars[par_names]
         
-        val <- unname(TSE_bs_oldpar(x = pars_ordered, fn_fit=fn_all_ode_cp, data = data_rpkm_all, time_data=time_data, convert_param=T, log_in=T, u=input_fun_cp, batch=batch, results = "sum", library_size = lib_mat, length = length))
-        gradient_val <- TSE_bs_cp_grad(x = pars_ordered, fn_fit=fn_all_ode_cp, data = data_rpkm_all, time_data=time_data, convert_param=T, log_in=T, u=input_fun_cp, batch=batch, results = "sum", library_size = lib_mat, length = length)
-        hessian_val <- TSE_bs_cp_hessian(x = pars_ordered,fn_fit=fn_all_ode_cp, data = data_rpkm_all, time_data=time_data, convert_param=T, log_in=T, u=input_fun_cp, batch=batch, results = "sum", library_size = lib_mat, length = length)
+        val <- unname(TSE_reps_oldpar(x = pars_ordered, fn_fit=fn_all_ode_cp, data = data_rpkm_all, time_data=time_data, convert_param=T, log_in=T, u=input_fun_cp, replicate=replicate, results = "sum", library_size = lib_mat, length = length))
+        gradient_val <- TSE_reps_cp_grad(x = pars_ordered, fn_fit=fn_all_ode_cp, data = data_rpkm_all, time_data=time_data, convert_param=T, log_in=T, u=input_fun_cp, replicate=replicate, results = "sum", library_size = lib_mat, length = length)
+        hessian_val <- TSE_reps_cp_hessian(x = pars_ordered,fn_fit=fn_all_ode_cp, data = data_rpkm_all, time_data=time_data, convert_param=T, log_in=T, u=input_fun_cp, replicate=replicate, results = "sum", library_size = lib_mat, length = length)
+        
+        if ( val == 1*10^16){
+          val <- NA
+        }
+        
         if ( !is.null(fixed) ){
           # 2* because not included in the chisq
           res <- objlist(
@@ -359,16 +367,16 @@ if (!file.exists(paste0(out_dir_path,'/sa_bfgs_merged', gene_name, '_Finished.Rd
 
       obj_vgh_transformed <- function(pars, fixed = NULL, scale=2, no_np = F, no_ca0 = F ){
         if ( no_np ){
-          par_names <- c("span", "sigma_t", "sigma_b", "b1_ca0", "k2", "kdeg", "k1'k2'/k2")
-          par_names_old <- c("span", "sigma_t", "sigma_b", "b1_ca0", "k1'k2'", "k2", "kdeg")
+          par_names <- c("span", "sigma_t", "sigma_b", "rep1_ca0", "k2", "kdeg", "k1'k2'/k2")
+          par_names_old <- c("span", "sigma_t", "sigma_b", "rep1_ca0", "k1'k2'", "k2", "kdeg")
         }else{
-          par_names <- c("span", "sigma_t", "sigma_b", "b1_ca0", "k2", "kdeg", "k1'/k2","k1'k2'/k2")
-          par_names_old <- c("span", "sigma_t", "sigma_b", "b1_ca0", "k1'","k2", "k2'", "kdeg")
+          par_names <- c("span", "sigma_t", "sigma_b", "rep1_ca0", "k2", "kdeg", "k1'/k2","k1'k2'/k2")
+          par_names_old <- c("span", "sigma_t", "sigma_b", "rep1_ca0", "k1'","k2", "k2'", "kdeg")
         }
         
         if ( !no_ca0 ){
-          par_names <- par_names[-which(par_names == "b1_ca0")]
-          par_names_old <- par_names_old[-which(par_names_old == "b1_ca0")]
+          par_names <- par_names[-which(par_names == "rep1_ca0")]
+          par_names_old <- par_names_old[-which(par_names_old == "rep1_ca0")]
         }
         
         if ( !is.null(fixed) ){
@@ -388,51 +396,77 @@ if (!file.exists(paste0(out_dir_path,'/sa_bfgs_merged', gene_name, '_Finished.Rd
         # reorder
         pars_old_ordered <- pars_old[par_names_old]
         
-        val <- unname(TSE_bs_oldpar(x = pars_old_ordered, fn_fit=fn_all_ode_cp, data = data_rpkm_all, time_data=time_data, convert_param=T, log_in=T, u=input_fun_cp, batch=batch, results = "sum", library_size = lib_mat, length = length))
-        gradient_val <- TSE_bs_cp_grad(x = pars_old_ordered, fn_fit=fn_all_ode_cp, data = data_rpkm_all, time_data=time_data, convert_param=T, log_in=T, u=input_fun_cp, batch=batch, results = "sum", library_size = lib_mat, length = length)
+        val <- unname(TSE_reps_oldpar(x = pars_old_ordered, fn_fit=fn_all_ode_cp, data = data_rpkm_all, time_data=time_data, convert_param=T, log_in=T, u=input_fun_cp, replicate=replicate, results = "sum", library_size = lib_mat, length = length))
+        
+        if ( val == 1*10^16){
+          val <- NA
+        }
+        
+        gradient_val <- TSE_reps_cp_grad(x = pars_old_ordered, fn_fit=fn_all_ode_cp, data = data_rpkm_all, time_data=time_data, convert_param=T, log_in=T, u=input_fun_cp, replicate=replicate, results = "sum", library_size = lib_mat, length = length)
         
         # add gradient for additional parnames
-        for (parname_add in par_names[which(par_names %in% c("k1'/k2", "k1'k2'/k2"))]){
-          if (parname_add == "k1'/k2"){
-            gradient_val <- c(gradient_val, gradient_val[par_names_old == "k1'"] - gradient_val[par_names_old == "k2"])
-          }else if(parname_add == "k1'k2'/k2"){
-            if(no_np){
-              gradient_val <- c(gradient_val, gradient_val[par_names_old == "k1'k2'"] - gradient_val[par_names_old == "k2"])
-            }else{
-              gradient_val <- c(gradient_val, gradient_val[par_names_old == "k1'"] + gradient_val[par_names_old == "k2'"] - gradient_val[par_names_old == "k2"])
-            }
-          }
+        # for (parname_add in par_names[which(par_names %in% c("k1'/k2", "k1'k2'/k2"))]){
+        #   if (parname_add == "k1'/k2"){
+        #     gradient_val <- c(gradient_val, gradient_val[par_names_old == "k1'"] - gradient_val[par_names_old == "k2"])
+        #   }else if(parname_add == "k1'k2'/k2"){
+        #     if(no_np){
+        #       gradient_val <- c(gradient_val, gradient_val[par_names_old == "k1'k2'"] - gradient_val[par_names_old == "k2"])
+        #     }else{
+        #       gradient_val <- c(gradient_val, gradient_val[par_names_old == "k1'"] + gradient_val[par_names_old == "k2'"] - gradient_val[par_names_old == "k2"])
+        #     }
+        #   }
+        # }
+        # # remove 
+        # gradient_val <- gradient_val[-which(par_names_old %in% c("k1'k2'", "k1'", "k2'"))]
+        # 
+        
+        if (!no_np){
+          trans_mat <- matrix(0, nrow=length(par_names), ncol=length(par_names_old))
+          trans_mat[1:4,1:4] <- diag(1,nrow = 4) # span, sigma_t, sigma_b, rep1_ca0 unchanged
+          trans_mat[, par_names_old == 'k2'] <- as.numeric(par_names == 'k2')
+          trans_mat[, par_names_old == 'kdeg'] <- as.numeric(par_names == 'kdeg')
+          trans_mat[, par_names_old == "k1'"] <- as.numeric(par_names == "k1'/k2") + as.numeric(par_names == "k2")
+          trans_mat[, par_names_old == "k2'"] <- as.numeric(par_names == "k1'k2'/k2")-as.numeric(par_names == "k1'/k2")
+        }else{
+          trans_mat <- matrix(0, nrow=length(par_names), ncol=length(par_names_old))
+          trans_mat[1:4,1:4] <- diag(1,nrow = 4) # span, sigma_t, sigma_b, rep1_ca0 unchanged
+          trans_mat[, par_names_old == 'k2'] <- as.numeric(par_names == 'k2')
+          trans_mat[, par_names_old == 'kdeg'] <- as.numeric(par_names == 'kdeg')
+          trans_mat[, par_names_old == "k1'k2'"] <- as.numeric(par_names == "k1'k2'/k2") + as.numeric(par_names == "k2")
         }
-        # remove 
-        gradient_val <- gradient_val[-which(par_names_old %in% c("k1'k2'", "k1'", "k2'"))]
+        
+        gradient_val <- trans_mat %*% gradient_val
         
         
-        hessian_val <- TSE_bs_cp_hessian(x = pars_old_ordered,fn_fit=fn_all_ode_cp, data = data_rpkm_all, time_data=time_data, convert_param=T, log_in=T, u=input_fun_cp, batch=batch, results = "sum", library_size = lib_mat, length = length)
+        hessian_val <- TSE_reps_cp_hessian(x = pars_old_ordered,fn_fit=fn_all_ode_cp, data = data_rpkm_all, time_data=time_data, convert_param=T, log_in=T, u=input_fun_cp, replicate=replicate, results = "sum", library_size = lib_mat, length = length)
+        
+        hessian_val <- trans_mat %*% hessian_val %*% t(trans_mat)
+        
         # add hessian for additional parnames
-        for (parname_add in par_names[which(par_names %in% c("k1'/k2", "k1'k2'/k2"))]){
-          if (parname_add == "k1'/k2"){
-            vec <- rep(0,ncol(hessian_val))
-            vec[which(par_names_old == "k1'")] <- 1
-            vec[which(par_names_old == "k2")] <- -1
-          }else if(parname_add == "k1'k2'/k2"){
-            vec <- rep(0,ncol(hessian_val))
-            if(no_np){
-              vec[which(par_names_old == "k1'k2'")] <- 1
-              vec[which(par_names_old == "k2")] <- -1
-            }else{
-              vec[which(par_names_old == "k1'")] <- 1
-              vec[which(par_names_old == "k2'")] <- 1
-              vec[which(par_names_old == "k2")] <- -1
-            }
-          }
-          hessian_val_add <- hessian_val %*% vec
-          hessian_val <- cbind(hessian_val, hessian_val_add)
-          hessian_val <- rbind(hessian_val, c(hessian_val_add, t(hessian_val_add) %*% vec))
-        }
-        
-        # hessian remove
-        hessian_val <- hessian_val[,-which(par_names_old %in% c("k1'k2'", "k1'", "k2'"))][-which(par_names_old %in% c("k1'k2'", "k1'", "k2'")),]
-        
+        # for (parname_add in par_names[which(par_names %in% c("k1'/k2", "k1'k2'/k2"))]){
+        #   if (parname_add == "k1'/k2"){
+        #     vec <- rep(0,ncol(hessian_val))
+        #     vec[which(par_names_old == "k1'")] <- 1
+        #     vec[which(par_names_old == "k2")] <- -1
+        #   }else if(parname_add == "k1'k2'/k2"){
+        #     vec <- rep(0,ncol(hessian_val))
+        #     if(no_np){
+        #       vec[which(par_names_old == "k1'k2'")] <- 1
+        #       vec[which(par_names_old == "k2")] <- -1
+        #     }else{
+        #       vec[which(par_names_old == "k1'")] <- 1
+        #       vec[which(par_names_old == "k2'")] <- 1
+        #       vec[which(par_names_old == "k2")] <- -1
+        #     }
+        #   }
+        #   hessian_val_add <- hessian_val %*% vec
+        #   hessian_val <- cbind(hessian_val, hessian_val_add)
+        #   hessian_val <- rbind(hessian_val, c(hessian_val_add, t(hessian_val_add) %*% vec))
+        # }
+        # 
+        # # hessian remove
+        # hessian_val <- hessian_val[,-which(par_names_old %in% c("k1'k2'", "k1'", "k2'"))][-which(par_names_old %in% c("k1'k2'", "k1'", "k2'")),]
+        # 
         # hessian_val <- matrix(0, ncol=length(pars_new_ordered), nrow=length(pars_new_ordered))
         
         if ( !is.null(fixed) ){
@@ -481,19 +515,19 @@ if (!file.exists(paste0(out_dir_path,'/sa_bfgs_merged', gene_name, '_Finished.Rd
           cpt1 <- proc.time()
           # test.exact <- profile(obj = obj_vgh, pars = par_best_old, whichPar = i, limits = c(-3,3), method = "optimize", cores = 1, verbose = T, scale = 2, no_np = no_np, no_ca0 = no_ca0)
           # test.exact <- profile_dMod_with_save(obj = obj_vgh, pars = par_best_old, whichPar = i, limits = c(-3,3), method = "optimize", cores = 1, verbose = T, scale = 2, no_np = no_np, no_ca0 = no_ca0, file_name = "/tmp/dMod_test_save.Rdata")
-          test.exact <- profile_dMod_with_save(obj = obj_vgh_main, pars = par_best_old, whichPar = i, limits = c(-3,3), method = "optimize", cores = 1, verbose = T, scale = 2, no_np = no_np, no_ca0 = no_ca0, file_name = paste0(out_dir_path,'/temp_par_',names(par_best_old)[i], '_', batch, '_', gene_name, '.Rdata',sep=""))
+          test.approx <- profile_dMod_with_save(obj = obj_vgh_main, pars = par_best_old, whichPar = i, limits = c(-10,10), method = "integrate", cores = 1, verbose = T, scale = 2, no_np = no_np, no_ca0 = no_ca0, file_name = paste0(out_dir_path,'/temp_par_',names(par_best_old)[i], '_', replicate, '_', gene_name, '.Rdata',sep=""), stepControl=list(limit=100000), algoControl = list(reoptimize = T))
           
           # plotProfile(test.exact)
           # plotPaths(test.exact, sort = TRUE)
-          cf <- confint(test.exact, val.column = "value")
+          cf <- confint(test.approx, val.column = "value")
           cpt2 <- proc.time()
           
-          dat_g <- c(dat_g, list(list(Profile = test.exact, CI=cf, computing_time = cpt2 - cpt1)))
+          dat_g <- c(dat_g, list(list(Profile = test.approx, CI=cf, computing_time = cpt2 - cpt1)))
           names(dat_g)[length(dat_g)] <- names(par_best_old)[i]
           save(dat_g, file=tmp_file)
           
-          if(file.exists(paste0(out_dir_path,'/temp_par_',names(par_best_old)[i], '_', batch, '_', gene_name, '.Rdata',sep=""))){
-            file.remove(paste0(out_dir_path,'/temp_par_',names(par_best_old)[i], '_', batch, '_', gene_name, '.Rdata',sep=""))
+          if(file.exists(paste0(out_dir_path,'/temp_par_',names(par_best_old)[i], '_', replicate, '_', gene_name, '.Rdata',sep=""))){
+            file.remove(paste0(out_dir_path,'/temp_par_',names(par_best_old)[i], '_', replicate, '_', gene_name, '.Rdata',sep=""))
           }
           # quit('no') # start the next param in a clean 24h session
         }  
@@ -511,26 +545,26 @@ if (!file.exists(paste0(out_dir_path,'/sa_bfgs_merged', gene_name, '_Finished.Rd
           cpt1 <- proc.time()
           # test.exact <- profile(obj = obj_vgh, pars = par_best_old, whichPar = i, limits = c(-3,3), method = "optimize", cores = 1, verbose = T, scale = 2, no_np = no_np, no_ca0 = no_ca0)
           # test.exact <- profile_dMod_with_save(obj = obj_vgh, pars = par_best_old, whichPar = i, limits = c(-3,3), method = "optimize", cores = 1, verbose = T, scale = 2, no_np = no_np, no_ca0 = no_ca0, file_name = "/tmp/dMod_test_save.Rdata")
-          test.exact <- profile_dMod_with_save(obj = obj_vgh_transformed, pars = par_best_old_transformed, whichPar = i, limits = c(-3,3), method = "optimize", cores = 1, verbose = T, scale = 2, no_np = no_np, no_ca0 = no_ca0, file_name = paste0(out_dir_path,'/temp_par_',gsub('/','over',names(par_best_old_transformed)[i]), '_', batch, '_', gene_name, '.Rdata',sep=""))
+          test.approx <- profile_dMod_with_save(obj = obj_vgh_transformed, pars = par_best_old_transformed, whichPar = i, limits = c(-3,3), method = "integrate", cores = 1, verbose = T, scale = 2, no_np = no_np, no_ca0 = no_ca0, file_name = paste0(out_dir_path,'/temp_par_',gsub('/','over',names(par_best_old_transformed)[i]), '_', replicate, '_', gene_name, '.Rdata',sep=""), stepControl=list(limit=100000))
           
           # plotProfile(test.exact)
           # plotPaths(test.exact, sort = TRUE)
-          cf <- confint(test.exact, val.column = "value")
+          cf <- confint(test.approx, val.column = "value")
           cpt2 <- proc.time()
           
-          dat_g <- c(dat_g, list(list(Profile = test.exact, CI=cf, computing_time = cpt2 - cpt1)))
+          dat_g <- c(dat_g, list(list(Profile = test.approx, CI=cf, computing_time = cpt2 - cpt1)))
           names(dat_g)[length(dat_g)] <- names(par_best_old_transformed)[i]
           save(dat_g, file=tmp_file)
           
-          if(file.exists(paste0(out_dir_path,'/temp_par_',gsub('/','over',names(par_best_old_transformed)[i]), '_', batch, '_', gene_name, '.Rdata',sep=""))){
-            file.remove(paste0(out_dir_path,'/temp_par_',gsub('/','over',names(par_best_old_transformed)[i]), '_', batch, '_', gene_name, '.Rdata',sep=""))
+          if(file.exists(paste0(out_dir_path,'/temp_par_',gsub('/','over',names(par_best_old_transformed)[i]), '_', replicate, '_', gene_name, '.Rdata',sep=""))){
+            file.remove(paste0(out_dir_path,'/temp_par_',gsub('/','over',names(par_best_old_transformed)[i]), '_', replicate, '_', gene_name, '.Rdata',sep=""))
           }
           # quit('no') # start the next param in a clean 24h session
         }  
       }
 
       sink()
-      save(dat_g, file = paste0(out_dir_path,'/profile_dMod_',batch, '_', gene_name, '_Finished.Rdata',sep=""))
+      save(dat_g, file = paste0(out_dir_path,'/profile_dMod_',replicate, '_', gene_name, '_Finished.Rdata',sep=""))
       file.remove(tmp_file)
     }
   # }
@@ -538,18 +572,18 @@ if (!file.exists(paste0(out_dir_path,'/sa_bfgs_merged', gene_name, '_Finished.Rd
   # if all finished merge
   dat_profile <- list()
   all_finished <- TRUE
-  for (batch in c('b1', 'b3', 'all', 'b2')){
-    if(!file.exists(paste0(out_dir_path,'/profile_dMod_', batch, '_', gene_name, '_Finished.Rdata',sep=""))){
+  for (replicate in c('rep1', 'rep2', 'all', 'rep3')){
+    if(!file.exists(paste0(out_dir_path,'/profile_dMod_', replicate, '_', gene_name, '_Finished.Rdata',sep=""))){
       all_finished <- FALSE
       break
     }
   }
   if(all_finished){
     dat_sa <- c()
-    for (batch in c('b1', 'b3', 'all', 'b2')){
-      load(file = paste0(out_dir_path,'/profile_dMod_', batch, '_', gene_name, '_Finished.Rdata',sep=""))
+    for (replicate in c('rep1', 'rep2', 'all', 'rep3')){
+      load(file = paste0(out_dir_path,'/profile_dMod_', replicate, '_', gene_name, '_Finished.Rdata',sep=""))
       dat_sa <- c(dat_sa, list(dat_g))
-      names(dat_sa)[length(dat_sa)] <- batch
+      names(dat_sa)[length(dat_sa)] <- replicate
     } 
     save(dat_sa, file = paste0(out_dir_path,'/profile_dMod_merged_', gene_name, '_Finished.Rdata',sep=""))
   }

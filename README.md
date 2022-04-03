@@ -51,7 +51,7 @@ Needed external softwares:
 * R (ggplot2, gridExtra, grid, scales, edgeR, biomaRT)
 
 ## Step 4: Model fitting
-Fitting can be done by running the script `Modeling > Main_weighting_for_smoothing_include_negbinom_error_in_model_reps.R` from the `Modeling` folder with this command `Rscript Main_weighting_for_smoothing_include_negbinom_error_in_model_reps.R i ri cond folder rep` where `i` is the gene index to be fittes, `ri` is the number of random initialisation to do, `cond` is the condition to use,  `folder` is the output folder for the results, `rep` is the replicate to fit.   
+Fitting can be done by running the script `Modeling > Main_weighting_for_smoothing_include_negbinom_error_in_model_reps.R` from the `Modeling` folder with this command `Rscript Main_weighting_for_smoothing_include_negbinom_error_in_model_reps.R i ri cond folder rep` where `i` is the gene index to be fitted, `ri` is the number of random initialisation to do, `cond` is the condition to use,  `folder` is the output folder for the results, `rep` is the replicate to fit.   
 For example: `Rscript Main_weighting_for_smoothing_include_negbinom_error_in_model_reps.R 1 1000 naive Results rep1`
 All the results obtianed from this step are located under `Modeling > Results`.
 
@@ -60,6 +60,15 @@ Needed external softwares:
 * R (compiler, deSolve)
 
 ## Step 5: Sensitivity analysis
+Sensitivity Analysis can be done by running the script `Modeling > Main_sa_dMod_approximate.R` for the approximate method and `Modeling > Main_sa_dMod_approximate.R` for the exact method from the `Modeling` folder with this command `Rscript Main_sa_dMod_approximate.R i cond folder rep` where `i` is the gene index to be fitted, `cond` is the condition to use, `folder` is the output folder for the results, `rep` is the replicate to fit.   
+For example: `Rscript Main_sa_dMod_approximate 1 naive Results rep1`
+All the results obtianed from this step are located under `Modeling > Results`.
+
+### Requirements for Step 5
+Needed external softwares:
+* R (compiler, deSolve, dMod, numDeriv)
+
+## Step 6: Intron retention
 
 -- To continue
 
