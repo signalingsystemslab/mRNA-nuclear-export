@@ -69,8 +69,20 @@ Needed external softwares:
 * R (compiler, deSolve, dMod, numDeriv)
 
 ## Step 6: Intron retention
+Intron retenttion was calculated on nucleoplasmic fraction bam files using [SQUID](https://github.com/Xinglab/SQUID), for exact options using to run SQUID see `Intron retention > squid_run.sh`. Results are given in `Intron retention > SQUID` folder.
+
+### Requirements for Step 6
+Needed external softwares:
+* python 2.7 (NumPy, SciPy, pysam) for SQUID
 
 -- To continue
+## Step 7: ActD see ActD analyser
+
+## Step 8: ChIPseq
+
+## Step 9: RBP
+
+## Step 10: Figures
 
 Figure: PCA DEGs on merged counts
 
