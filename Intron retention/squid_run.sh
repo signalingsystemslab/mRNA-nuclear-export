@@ -34,11 +34,12 @@ export -f run_squid
 OUT_DIR="SQUID/Naive"
 mkdir -p $OUT_DIR
 parallel -j $N_THREADS --no-notice run_squid {} ::: $(ls $IN_DIR/ | grep Nuc.Naive.rep[1-3])
-gzip -9 $OUT_DIR/Results/
+gzip -9 $OUT_DIR/*/Result/intron_PI.txt
 
 OUT_DIR="SQUID/LPA"
 mkdir -p $OUT_DIR
 parallel -j $N_THREADS --no-notice run_squid {} ::: $(ls $IN_DIR/ | grep Nuc.LPA.rep[1-3])
+gzip -9 $OUT_DIR/*/Result/intron_PI.txt
 
 unset -f run_squid
 

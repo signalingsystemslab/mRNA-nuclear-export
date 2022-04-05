@@ -5,7 +5,7 @@ All files/scripts related to this step are listed under the `RNAseq processing p
 RNAseq data were processed from qseq to counts using the pipeline `pipeline_ENCODE_ref.sh` ran on a Linux server ubuntu 16.04. The ouptut of this step are count files which are made available in the `Data > merged_counts` folder. We recommend starting after this step.  
 For this step multiple scripts were used for each processing substeps:
 * Conversion of qseq to fastq files see bash script`02_consolidated_michael.sh`
-* Trimming adapter sequence using cudadapt, to see exact options used see `03_trimming_index_universal.sh`. Fastq files obtained after this step were deposit on ENCODE
+* Trimming adapter sequence using cudadapt, to see exact options used see `03_trimming_index_universal.sh`. Fastq files obtained after this step were deposited on ENCODE DCC
 * Reads were aligned using STAR software, to see exact options used see `05_trimming_index_universal.sh`
 * Alignments were filtered to keep only reads mapped in proper pair and remove unmapped read/mates or failing vendor quality using samtools, to see exact options used see `06_filtering.sh`. 
 * Alignment were filtered to only keep uniquely aligned reads using samtools. To see exact options used see `06_filtering_unique.sh`.
@@ -75,14 +75,45 @@ Intron retenttion was calculated on nucleoplasmic fraction bam files using [SQUI
 Needed external softwares:
 * python 2.7 (NumPy, SciPy, pysam) for SQUID
 
--- To continue
-## Step 7: ActD see ActD analyser
+## Step 7: Half-life estimation from ActinomycinD treated samples
+Half-life estimates from ActinomycinD RNAseq were derived using the [ActDAnalyser](https://github.com/signalingsystemslab/ActDAnalyser) and resulting estimates can be found in the `ActD` folder. Fastqs and bams files used to derive those half-life have been deposited on SRA.
+
+### Requirements for Step 7:
+Needed external softwares:
+* R (ggplot2, stats, ggpubr, gridExtra, edgeR)
 
 ## Step 8: ChIPseq
+Histone ChIPseq fastq files were deposited on ENCODE DCC and processed using [Encode histone ChIPseq pipeline](https://github.com/ENCODE-DCC/chip-seq-pipeline2) and annotated to the closest gene with HOMER. Then machine learning model was developped to see if histone marks could be a factor influencing effective transport rate.
+
+### Requirements for Step 8:
+Needed external softwares:
+* Python3 (caper)
+* HOMER
+* R (ggplot2, stats, ggpubr, gridExtra, edgeR)
+
 
 ## Step 9: RBP
 
-## Step 10: Figures
+### Requirements for Step *:
+Needed external softwares:
+* HOMER
+* R (ggplot2, stats, ggpubr, gridExtra, edgeR)
 
+
+
+## Step 9: RBP
+
+### Requirements for Step *:
+Needed external softwares:
+* HOMER
+* R (ggplot2, stats, ggpubr, gridExtra, edgeR)
+
+
+
+## Step 10: Figures
 Figure: PCA DEGs on merged counts
+
+## Step 11: Supplementary Documents
+
+
 
