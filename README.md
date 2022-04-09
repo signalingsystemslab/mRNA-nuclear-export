@@ -85,19 +85,11 @@ Needed external softwares:
 * R (ggplot2, stats, ggpubr, gridExtra, edgeR)
 
 ## Step 10: Figures
-Script to generate most figures is found under `Figures > Manuscript_figures.R` similarly to previously this script need to be run under its parent directory.
+Script to generate most figures in the manuscript and some supplementary documents is found under `Figures > Manuscript_figures.R` similarly to previously this script need to be run under its parent directory.
 
 ### Requirements for Step 10:
 Needed external softwares:
 * R (RColorBrewer, grid, ggplot2, openxlsx, biomaRt, compiler, scales, deSolve, ComplexHeatmap, circlize, MASS, pheatmap, gridExtra, plotly)
-
-## Step 11: Supplementary Documents
-
-### Requirements for Step 8:
-R (RColorBrewer, grid, ggplot2, openxlsx, biomaRt, compiler, scales, deSolve, ComplexHeatmap, circlize, MASS, pheatmap)
-
-
-
 
 -- To continue
 ## Step 8: ChIPseq
@@ -111,8 +103,6 @@ Needed external softwares:
 
 !!! Need to find script to make csv from modeling results for Kevin's script inputs: 
 * parameter.csv
-* splicingprob.rds
-* curated.csv
 
 
 ## Step 9: RBP

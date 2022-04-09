@@ -75,7 +75,7 @@ plot_pca_many_exp <- function(data, barcodes, type, interactive=F, high_threshol
   return(p)
 }
 
-# chromatin b1 #####
+# chromatin rep1 #####
 Xap114L1 <- read.table( file = '../../Data/individual_counts/SxaQSEQsXap114L1/08_counts/all/all_counts.txt.gz', header = T)
 Xap114L2 <- read.table( file = '../../Data/individual_counts/SxaQSEQsXap114L2/08_counts/all/all_counts.txt.gz', header = T)
 Xbp051L1 <- read.table( file = '../../Data/individual_counts/SxaQSEQsXbp051L1/08_counts/all/all_counts.txt.gz', header = T)
