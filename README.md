@@ -69,11 +69,13 @@ Needed external softwares:
 * R (compiler, deSolve, dMod, numDeriv)
 
 ## Step 6: Intron retention
-Intron retenttion was calculated on nucleoplasmic fraction bam files using [SQUID](https://github.com/Xinglab/SQUID), for exact options using to run SQUID see `Intron retention > squid_run.sh`. Results are given in `Intron retention > SQUID` folder.
+Intron retenttion was calculated on nucleoplasmic fraction bam files using [SQUID](https://github.com/Xinglab/SQUID), for exact options using to run SQUID see `Intron retention > squid_run.sh`. Results are given in `Intron retention > SQUID` folder.    
+The R script `Intron retention > Introns.R` must be run from its parent directory.
 
 ### Requirements for Step 6
 Needed external softwares:
 * python 2.7 (NumPy, SciPy, pysam) for SQUID
+* R (biomaRt)
 
 ## Step 7: Half-life estimation from ActinomycinD treated samples
 Half-life estimates from ActinomycinD RNAseq were derived using the [ActDAnalyser](https://github.com/signalingsystemslab/ActDAnalyser) and resulting estimates can be found in the `ActD` folder. Fastqs and bams files used to derive those half-life have been deposited on SRA.
@@ -82,38 +84,40 @@ Half-life estimates from ActinomycinD RNAseq were derived using the [ActDAnalyse
 Needed external softwares:
 * R (ggplot2, stats, ggpubr, gridExtra, edgeR)
 
+## Step 10: Figures
+Script to generate most figures is found under `Figures > Manuscript_figures.R` similarly to previously this script need to be run under its parent directory.
+
+### Requirements for Step 10:
+Needed external softwares:
+* R (RColorBrewer, grid, ggplot2, openxlsx, biomaRt, compiler, scales, deSolve, ComplexHeatmap, circlize, MASS, pheatmap, gridExtra, plotly)
+
+## Step 11: Supplementary Documents
+
+### Requirements for Step 8:
+R (RColorBrewer, grid, ggplot2, openxlsx, biomaRt, compiler, scales, deSolve, ComplexHeatmap, circlize, MASS, pheatmap)
+
+
+
+
+-- To continue
 ## Step 8: ChIPseq
-Histone ChIPseq fastq files were deposited on ENCODE DCC and processed using [Encode histone ChIPseq pipeline](https://github.com/ENCODE-DCC/chip-seq-pipeline2) and annotated to the closest gene with HOMER. Then machine learning model was developped to see if histone marks could be a factor influencing effective transport rate.
+Histone ChIPseq fastq files were deposited on ENCODE DCC and processed using [Encode histone ChIPseq pipeline](https://github.com/ENCODE-DCC/chip-seq-pipeline2) and annotated to the closest gene with HOMER, resulting files are located in `ChIPSeq > Results`. Then machine learning model was developped to see if histone marks could be a factor influencing effective transport rate, see `ChIPSeq > caret.R` this script must be run from within it parent directory.
 
 ### Requirements for Step 8:
 Needed external softwares:
 * Python3 (caper)
 * HOMER
-* R (ggplot2, stats, ggpubr, gridExtra, edgeR)
+* R (data.table, dplyr, ggplot2, leaps, gridExtra, caret, skimr, RANN, doSNOW, plyr, grid, xgboost, pheatmap, svglite, alr3)
+
+!!! Need to find script to make csv from modeling results for Kevin's script inputs: 
+* parameter.csv
+* splicingprob.rds
+* curated.csv
 
 
 ## Step 9: RBP
 
-### Requirements for Step *:
+### Requirements for Step 9:
 Needed external softwares:
 * HOMER
 * R (ggplot2, stats, ggpubr, gridExtra, edgeR)
-
-
-
-## Step 9: RBP
-
-### Requirements for Step *:
-Needed external softwares:
-* HOMER
-* R (ggplot2, stats, ggpubr, gridExtra, edgeR)
-
-
-
-## Step 10: Figures
-Figure: PCA DEGs on merged counts
-
-## Step 11: Supplementary Documents
-
-
-
