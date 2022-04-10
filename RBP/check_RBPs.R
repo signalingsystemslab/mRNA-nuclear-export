@@ -124,8 +124,7 @@ merge_intervals <- function(intervals, strand){
   res <- list(intervals_merged,merge_delim)
 }
 
-load('../Modeling/all_results.Rdata')
-
+load(file = '../Modeling/all_results.Rdata')
 
 param_best_all <- as.data.frame(Reduce(cbind,lapply(as.data.frame(all_best_param$naive$all), function(x){unlist(x)})))
 colnames(param_best_all) <- colnames(all_best_param$naive$all)

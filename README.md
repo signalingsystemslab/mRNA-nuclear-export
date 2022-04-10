@@ -69,7 +69,7 @@ Needed external softwares:
 * R (compiler, deSolve, dMod, numDeriv)
 
 ## Step 6: Generate R data with all modeling results
- A rscript was used to aggregate all results from step 4 and 5 to use for figures, see `Modeling > Create_summary_resutls_data.R`.
+ A rscript was used to aggregate all results from step 4 and 5 to use for figures, see `Modeling > Create_summary_resutls_data.R`. This R script must be run from its parents directory.
  
 ### Requirements for Step 6
 Needed external softwares:
@@ -117,14 +117,4 @@ Script to generate most figures in the manuscript and some supplementary documen
 ### Requirements for Step 11:
 Needed external softwares:
 * R (RColorBrewer, grid, ggplot2, openxlsx, biomaRt, compiler, scales, deSolve, ComplexHeatmap, circlize, MASS, pheatmap, gridExtra, plotly)
-
-
-TO DO:
-
-check RBP -> add results
-check script to make summary modeling data -> add results
-recheck figure
-check param.csv kevin -> add files
-Make sure all intermediairy files are there
-
 

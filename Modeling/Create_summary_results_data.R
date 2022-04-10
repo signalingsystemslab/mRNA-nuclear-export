@@ -885,5 +885,10 @@ for (condition in c('naive', 'lpa')){
   }
 }
 
-save(all_annot, all_best_param, all_param, all_data, all_fit, all_fit_CI, all_library, all_param_CI, file = 'all_results.Rdata')
+all_param_naive <- all_param$naive
+all_param_lpa <- all_param$lpa
+
+save(all_param_naive, file = 'all_param_naive.Rdata')
+save(all_param_lpa, file = 'all_param_lpa.Rdata')
+save(all_annot, all_best_param, all_data, all_fit, all_fit_CI, all_library, all_param_CI, file = 'all_results.Rdata')
 stop()
