@@ -256,8 +256,8 @@ for (condition in c('naive','lpa')){
         SSEs_g_total <- TSE_reps_cp(par = par, fn_fit=fn_all_ode_cp, data = data_all, time_data=time_data, convert_param=T, log_in=T, u=input_fun_cp, replicate=b, results = "sum", library_size = lib_mat, length = gene_length)
         SSEs_g_det <- TSE_reps_cp(par = par, fn_fit=fn_all_ode_cp, data = data_all, time_data=time_data, convert_param=T, log_in=T, u=input_fun_cp, replicate=b, results = "detailed", library_size = lib_mat, length = gene_length)
         
-        # print(SSEs_g_total)
-        # print(min(bfgs[[b]]$value))
+        print(SSEs_g_total)
+        print(min(bfgs[[b]]$value))
         
         par_theo <- par
         par_theo[2:3] <- c(0,1*10^-6)

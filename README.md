@@ -84,14 +84,6 @@ Half-life estimates from ActinomycinD RNAseq were derived using the [ActDAnalyse
 Needed external softwares:
 * R (ggplot2, stats, ggpubr, gridExtra, edgeR)
 
-## Step 10: Figures
-Script to generate most figures in the manuscript and some supplementary documents is found under `Figures > Manuscript_figures.R` similarly to previously this script need to be run under its parent directory.
-
-### Requirements for Step 10:
-Needed external softwares:
-* R (RColorBrewer, grid, ggplot2, openxlsx, biomaRt, compiler, scales, deSolve, ComplexHeatmap, circlize, MASS, pheatmap, gridExtra, plotly)
-
--- To continue
 ## Step 8: ChIPseq
 Histone ChIPseq fastq files were deposited on ENCODE DCC and processed using [Encode histone ChIPseq pipeline](https://github.com/ENCODE-DCC/chip-seq-pipeline2) and annotated to the closest gene with HOMER, resulting files are located in `ChIPSeq > Results`. Then machine learning model was developped to see if histone marks could be a factor influencing effective transport rate, see `ChIPSeq > caret.R` this script must be run from within it parent directory.
 
@@ -104,10 +96,15 @@ Needed external softwares:
 !!! Need to find script to make csv from modeling results for Kevin's script inputs: 
 * parameter.csv
 
-
 ## Step 9: RBP
 
 ### Requirements for Step 9:
 Needed external softwares:
-* HOMER
-* R (ggplot2, stats, ggpubr, gridExtra, edgeR)
+
+
+## Step 10: Figures
+Script to generate most figures in the manuscript and some supplementary documents is found under `Figures > Manuscript_figures.R` similarly to previously this script need to be run under its parent directory.
+
+### Requirements for Step 10:
+Needed external softwares:
+* R (RColorBrewer, grid, ggplot2, openxlsx, biomaRt, compiler, scales, deSolve, ComplexHeatmap, circlize, MASS, pheatmap, gridExtra, plotly)
