@@ -68,26 +68,33 @@ All the results obtianed from this step are located under `Modeling > Results`.
 Needed external softwares:
 * R (compiler, deSolve, dMod, numDeriv)
 
-## Step 6: Intron retention
+## Step 6: Generate R data with all modeling results
+ A rscript was used to aggregate all results from step 4 and 5 to use for figures, see `Modeling > Create_summary_resutls_data.R`.
+ 
+### Requirements for Step 6
+Needed external softwares:
+* R (compiler, deSolve, biomaR)
+
+## Step 7: Intron retention
 Intron retenttion was calculated on nucleoplasmic fraction bam files using [SQUID](https://github.com/Xinglab/SQUID), for exact options using to run SQUID see `Intron retention > squid_run.sh`. Results are given in `Intron retention > SQUID` folder.    
 The R script `Intron retention > Introns.R` must be run from its parent directory.
 
-### Requirements for Step 6
+### Requirements for Step 7
 Needed external softwares:
 * python 2.7 (NumPy, SciPy, pysam) for SQUID
 * R (biomaRt)
 
-## Step 7: Half-life estimation from ActinomycinD treated samples
+## Step 8: Half-life estimation from ActinomycinD treated samples
 Half-life estimates from ActinomycinD RNAseq were derived using the [ActDAnalyser](https://github.com/signalingsystemslab/ActDAnalyser) and resulting estimates can be found in the `ActD` folder. Fastqs and bams files used to derive those half-life have been deposited on SRA.
 
-### Requirements for Step 7:
+### Requirements for Step 8:
 Needed external softwares:
 * R (ggplot2, stats, ggpubr, gridExtra, edgeR)
 
-## Step 8: ChIPseq
+## Step 9: ChIPseq
 Histone ChIPseq fastq files were deposited on ENCODE DCC and processed using [Encode histone ChIPseq pipeline](https://github.com/ENCODE-DCC/chip-seq-pipeline2) and annotated to the closest gene with HOMER, resulting files are located in `ChIPSeq > Results`. Then machine learning model was developped to see if histone marks could be a factor influencing effective transport rate, see `ChIPSeq > caret.R` this script must be run from within it parent directory.
 
-### Requirements for Step 8:
+### Requirements for Step 9:
 Needed external softwares:
 * Python3 (caper)
 * HOMER
@@ -96,15 +103,28 @@ Needed external softwares:
 !!! Need to find script to make csv from modeling results for Kevin's script inputs: 
 * parameter.csv
 
-## Step 9: RBP
-
-### Requirements for Step 9:
-Needed external softwares:
-
-
-## Step 10: Figures
-Script to generate most figures in the manuscript and some supplementary documents is found under `Figures > Manuscript_figures.R` similarly to previously this script need to be run under its parent directory.
+## Step 10: RBP
+To look for RBP binding sites on the 3' and 5' utr, first sequences of the utr of the main isoforms were extracted see `RBP > check_RBP.R`. R script has to be run from its parent directory. And then the (AME)[https://meme-suite.org/meme/tools/ame] tool form the meme suite was run see `RBP > ame_main.sh`. The `DB_DIR` has to be set to the location of the meme suite software installation.
 
 ### Requirements for Step 10:
 Needed external softwares:
+* R (httr)
+* Meme Suite
+
+## Step 11: Figures
+Script to generate most figures in the manuscript and some supplementary documents is found under `Figures > Manuscript_figures.R` similarly to previously this script need to be run under its parent directory.
+
+### Requirements for Step 11:
+Needed external softwares:
 * R (RColorBrewer, grid, ggplot2, openxlsx, biomaRt, compiler, scales, deSolve, ComplexHeatmap, circlize, MASS, pheatmap, gridExtra, plotly)
+
+
+TO DO:
+
+check RBP -> add results
+check script to make summary modeling data -> add results
+recheck figure
+check param.csv kevin -> add files
+Make sure all intermediairy files are there
+
+
