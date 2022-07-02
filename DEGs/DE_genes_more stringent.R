@@ -12,9 +12,11 @@ ensembl <- useMart(biomart = 'ensembl', dataset = 'mmusculus_gene_ensembl', host
 # run DEG function
 run_DEG <- function(dat, Time, Batch, group, RPKM_th, timeth, FC_th, pval, adjust, direction){
   y <- DGEList(counts = dat[ , -c(1:6) ], group = group, genes = dat[ , 1:6 ])
+  print(nrow(dat))
   
   # remove low gene for estimation of expression
   keep <- apply(y$counts, 1, function(x){ any( x > 32 ) }) 
+  print(sum(keep))
   y <- DGEList(counts = dat[ keep, -c(1:6) ], group = group, genes = dat[ keep, 1:6 ])
   y <- calcNormFactors(y)
   
@@ -27,7 +29,7 @@ run_DEG <- function(dat, Time, Batch, group, RPKM_th, timeth, FC_th, pval, adjus
   hist(apply(rpkms,1,max))
   
   keep <- apply(rpkms, 1, function(x){ sum( x >= RPKM_th ) >= 3}) 
-  
+  print(sum(keep))
   
   # plotBCV(disp)
   fit <- glmQLFit(disp[ keep, ], design, robust = TRUE)

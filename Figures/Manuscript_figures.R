@@ -1605,7 +1605,7 @@ leg <- gglegend(p)
 grid.draw(leg)
 # dev.off()
 
-##### Genes controlling Tolerance ######-------------------------
+##### Figure 4E - Genes controlling Tolerance ######-------------------------
 gene_tol <- getBM(attributes=c('external_gene_name', 'go_id','name_1006', 'namespace_1003'), filter='external_gene_name', values=row.names(all_best_param$naive$all),mart = mm_89)
 gene_gobp <- gene_tol[gene_tol$namespace_1003 == "biological_process",]
 
@@ -1619,7 +1619,7 @@ gene_cat <- list("Cell growth genes" = c("Cd44", "Cdkn1a", "Cxcl16", "Dcbld2", "
                  "Negative regulation of MAPK" = c("Cav1",  "Dusp1", "Dusp14", "Dusp16", "Dusp2", "Dusp4", "Dusp5", "Dusp8", "Spred1"),  
                  "Negative regulation of NFKB" = c("Nfkbia", "Nfkbib", "Nfkbid", "Tnfaip3", "Nfkrep3", "Tnfaip2", "Nfkbie"),
                  "Cytokines" = c("Tnf", "Ifnrep1", "Il1a", "Il10", "Il6", "Il1b", "Il23a", "Il12b"),
-                 "Chemokine" = c("Cxcl10", "Ccl7", "Cxcl2", "Cxcl1", "Ccl2", "Ccl4", "Ccl12", "Ccl9", "Cxcl9", "Ccl5", "Cxcl16"))
+                 "Chemokines" = c("Cxcl10", "Ccl7", "Cxcl2", "Cxcl1", "Ccl2", "Ccl4", "Ccl12", "Ccl9", "Cxcl9", "Ccl5", "Cxcl16"))
 
 dat_ggplot_6 <- cbind(dat_ggplot[dat_ggplot$Parameter_name == c("k1'k2'/k2") & dat_ggplot$Condition == "naive" & dat_ggplot$Batch %in% c("rep1","rep2") & apply(dat_ggplot[,c("CIL_0.95_Min", "CIU_0.95_Max")],1,function(x){all(is.na(x))}),], Cat = "All induced genes")
 for ( go  in names(gene_cat)){
@@ -1641,6 +1641,7 @@ p <- p + geom_density_ridges(mapping = aes(point_shape = Batch), panel_scaling=F
                              jittered_points = TRUE,
                              position = position_points_jitter(width = 0, height = 0), point_size = 2, point_alpha = 1, alpha = 0.5
 )
+p <- p + scale_x_continuous(limits = c(-3,0.5)) 
 p <- p + theme_bw()
 p <- p + guides(fill=FALSE) + labs(y="", x="Effective transport rate (log10)", point_shape="Replicates", linetype="Replicates") 
 print(p) 
